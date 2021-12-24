@@ -6,23 +6,33 @@ import (
 	"github.com/marti700/veritas/linearalgebra/vector"
 )
 
-func GradiantDescent(s float64, data *matrix.Matrix, target *vector.Vector, gradient []func(...float64)) (*vector.Vector, error) {
+// Execute the gradiant descent algorithm
+// learningRate: is the algorithm learning rate
+// data: is the matrix on which the hyperparameters will be estimated
+// target: the variable we are trying to predict
+// gradient: the gradient of the loss function
+func GradiantDescent(learningRate float64,
+	data *matrix.Matrix,
+	target *vector.Vector,
+	gradient []func(target []float64,
+		data *matrix.Matrix,
+		slopes []float64) float64) (*vector.Vector, error) {
+
 	if data.Col != len(gradient) {
 		return nil, errors.New("matrix dimesion should be equal to gradient size")
 	}
 
-	// transpose the matrix to get its columns
-	dataT := data.T()
-	// append 1 to each column
-
-	// generate slopes initial values (i guess they can be zero)
-	slopesVal := vector.NewVector(make([]float64, len(gradient)))
+	// generate slopes initial values (I guess they can be zero) -
+	slopesVal := make([]float64, len(gradient))
 	tempSlopeVals := make([]float64, len(gradient))
 
-	// multiply the data by the slope values
-	// after eatch iteration simultaniuosly update the slopes
-
-
-	return nil, nil
-
+	for i := 0; i < 1000; i++ {
+		for j := 0; j < len(gradient); j++ {
+			tempSlopeVals[j] = tempSlopeVals[j] - (learningRate * gradient[j](target.Data, data, slopesVal))
+		}
+		// after eatch iteration simultaniuosly update the slopes
+		copy(slopesVal, tempSlopeVals)
+	}
+	newVectorsVal := vector.NewVector(slopesVal)
+	return &newVectorsVal, nil
 }
