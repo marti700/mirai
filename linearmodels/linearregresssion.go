@@ -20,7 +20,7 @@ type LinearRegression struct {
 // the data parameter is the data observations represented as a matrix
 // learningRate is the learning rate at which the model will learn
 // this function returns a vector that represents the estimations for the model hyperparameters
-func (m LinearRegression) Train(target linearalgebra.Matrix,
+func (m *LinearRegression) Train(target linearalgebra.Matrix,
 	data linearalgebra.Matrix,
 	learningRate float64) {
 
