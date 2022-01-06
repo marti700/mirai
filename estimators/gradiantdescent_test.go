@@ -1,10 +1,10 @@
 package estimators_test
 
 import (
-	"math"
 	"testing"
 
 	"github.com/marti700/mirai/estimators"
+	"github.com/marti700/mirai/testutils"
 	"github.com/marti700/veritas/linearalgebra"
 )
 
@@ -47,17 +47,7 @@ func TestGradintDescent(t *testing.T) {
 
 	expected := linearalgebra.NewColumnVector([]float64{0.95, 0.65})
 
-	if !acceptableReslts(expected, *gdr) {
+	if !testutils.AcceptableReslts(expected, *gdr) {
 		t.Error("Error expected result is ", expected, " but was", *gdr)
 	}
-}
-
-//TEST UTILS
-func acceptableReslts(expected, actual linearalgebra.Matrix) bool {
-	for i := range expected.Data {
-		if math.Abs(expected.Data[i]-actual.Data[i]) > 2 {
-			return false
-		}
-	}
-	return true
 }
