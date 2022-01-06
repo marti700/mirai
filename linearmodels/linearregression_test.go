@@ -23,7 +23,12 @@ func TestLinearRegressionTrain(t *testing.T) {
 
 	lr := linearmodels.LinearRegression{}
 
-	lr.Train(target, data, 0.01)
+	options := linearmodels.LROptions {
+		Estimator: "gd",
+		LearningRate: 0.01,
+	}
+
+	lr.Train(target, data, options)
 
 	// expected hyper parameter estimations
 	expected := linearalgebra.NewColumnVector([]float64{0.95, 0.65})
