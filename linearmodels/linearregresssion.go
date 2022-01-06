@@ -1,4 +1,4 @@
-package regression
+package linearmodels
 
 import (
 	"github.com/marti700/mirai/estimators"
