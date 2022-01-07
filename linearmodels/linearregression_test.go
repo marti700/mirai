@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/marti700/mirai/linearmodels"
+	"github.com/marti700/mirai/options"
 	"github.com/marti700/mirai/testutils"
 	"github.com/marti700/veritas/linearalgebra"
 )
@@ -23,9 +24,8 @@ func TestLinearRegressionTrain(t *testing.T) {
 
 	lr := linearmodels.LinearRegression{}
 
-	options := linearmodels.LROptions {
-		Estimator: "gd",
-		LearningRate: 0.01,
+	options := options.LROptions {
+		Estimator: options.NewGDOptions(1000, 0.01, 0.00003),
 	}
 
 	lr.Train(target, data, options)

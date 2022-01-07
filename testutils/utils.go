@@ -7,7 +7,8 @@ import (
 
 func AcceptableReslts(expected, actual linearalgebra.Matrix) bool {
 	for i := range expected.Data {
-		if math.Abs(expected.Data[i]-actual.Data[i]) > 2 {
+		absoluteDelta :=  math.Abs(expected.Data[i]-actual.Data[i])
+		if absoluteDelta > 2 || math.IsNaN(absoluteDelta)  {
 			return false
 		}
 	}

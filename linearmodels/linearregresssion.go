@@ -2,12 +2,13 @@ package linearmodels
 
 import (
 	"github.com/marti700/mirai/estimators"
+	"github.com/marti700/mirai/options"
 	"github.com/marti700/veritas/linearalgebra"
 )
 
 // Linear model is an interface that wraps the basic behavior of linear models
 type LinearModel interface {
-	train(target linearalgebra.Matrix, data linearalgebra.Matrix, options LROptions)
+	train(target linearalgebra.Matrix, data linearalgebra.Matrix, options options.LROptions)
 	predict(data linearalgebra.Matrix) float64
 }
 
@@ -23,10 +24,11 @@ type LinearRegression struct {
 // LROptions.Estimator = "gd" and LROptinos.LearningRate = 0
 func (m *LinearRegression) Train(target linearalgebra.Matrix,
 	data linearalgebra.Matrix,
-	options LROptions) {
+	opt options.LROptions) {
 
-	if options.Estimator == "gd" {
-		if options.LearningRate == 0.0 {
+	if opt.Estimator.GetType() == "gd" {
+		learningRate := opt.Estimator.(options.GDOptions).LearningRate
+		if  learningRate == 0.0 {
 			panic("Learning rate is 0")
 		}
 
@@ -44,7 +46,7 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 			return linearalgebra.NewColumnVector(lossFunctionVals)
 		}
 
-		estimatedHyperParameters := estimators.GradiantDescent(options.LearningRate, &data, &target, gradient)
+		estimatedHyperParameters := estimators.GradiantDescent(learningRate, &data, &target, gradient)
 
 		m.Hyperparameters = *estimatedHyperParameters
 	}
