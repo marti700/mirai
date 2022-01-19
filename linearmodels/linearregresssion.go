@@ -45,10 +45,11 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 			}
 			return linearalgebra.NewColumnVector(lossFunctionVals)
 		}
-
 		estimatedHyperParameters := estimators.GradiantDescent(learningRate, &data, &target, gradient)
-
 		m.Hyperparameters = *estimatedHyperParameters
+	} else if opt.Estimator.GetType() == "ols" {
+		data, _ = data.InsertAt(linearalgebra.Ones(data.Row, 1), 0)
+		m.Hyperparameters = estimators.OLS(data, target)
 	}
 }
 
