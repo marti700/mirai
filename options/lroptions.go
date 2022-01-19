@@ -1,4 +1,4 @@
-// this files defines a struct that defines some possible configurations 
+// this files declares a struct that defines some possible configurations
 // for the linear regression model
 package options
 
