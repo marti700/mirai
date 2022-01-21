@@ -40,8 +40,7 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 			currentModelResults := f.Mult(slopes)
 			for j := 0; j < f.Col; j++ {
 				predErr := tv.Substract(currentModelResults)
-				result := f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr)
-				lossFunctionVals[j] = linearalgebra.ElementsSum(result)
+				lossFunctionVals[j] = linearalgebra.ElementsSum(f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr))
 			}
 			return linearalgebra.NewColumnVector(lossFunctionVals)
 		}
