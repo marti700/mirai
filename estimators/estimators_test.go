@@ -9,6 +9,7 @@ import (
 )
 
 func TestGradintDescent(t *testing.T) {
+
 	//POINTS
 	// (0.5,1.4)
 	// (2.9,3.2)
@@ -34,10 +35,10 @@ func TestGradintDescent(t *testing.T) {
 		lossFunctionVals := make([]float64, f.Col)
 
 		//model predictios with the currently estimated slope values
-		currentModelResults, _ := f.Mult(slopes)
+		currentModelResults := f.Mult(slopes)
 		for j := 0; j < f.Col; j++ {
-			predErr, _ := tv.Substract(currentModelResults)
-			result, _ := f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr)
+			predErr := tv.Substract(currentModelResults)
+			result  := f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr)
 			lossFunctionVals[j] = linearalgebra.ElementsSum(result)
 		}
 		return linearalgebra.NewColumnVector(lossFunctionVals)

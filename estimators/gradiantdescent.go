@@ -28,7 +28,7 @@ func GradiantDescent(learningRate float64,
 		// 1- Solves for the slop using the target and data parameters
 		// 2- multiplies for the learning rate
 		// 3- substract to old step size from the result obtained in the previous operationc
-		tempSlopeVals, _ = tempSlopeVals.Substract(gradient(*target, *data, slopesVal).ScaleBy(learningRate))
+		tempSlopeVals = tempSlopeVals.Substract(gradient(*target, *data, slopesVal).ScaleBy(learningRate))
 		// simultaniuosly update the slopes to their new values
 		copy(slopesVal.Data, tempSlopeVals.Data)
 	}
