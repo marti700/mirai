@@ -24,7 +24,7 @@ func TestLinearRegressionTrainGD(t *testing.T) {
 
 	lr := linearmodels.LinearRegression{}
 
-	options := options.LROptions {
+	options := options.LROptions{
 		Estimator: options.NewGDOptions(1000, 0.01, 0.00003),
 	}
 
@@ -33,36 +33,27 @@ func TestLinearRegressionTrainGD(t *testing.T) {
 	// expected hyper parameter estimations
 	expected := linearalgebra.NewColumnVector([]float64{0.95, 0.65})
 
-	if !testutils.AcceptableReslts(expected, lr.Hyperparameters) {
+	if !testutils.AcceptableResults(expected, lr.Hyperparameters, 0.001) {
 		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
 	}
 }
 
 func TestLinearRegressionTrainOLS(t *testing.T) {
-	data := linearalgebra.NewMatrix([][]float64{
-		{0.5},
-		{2.9},
-		{2.3},
-	})
-
-	target := linearalgebra.NewMatrix([][]float64{
-		{1.4},
-		{3.2},
-		{1.9},
-	})
+	trainData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/x_train.csv")
+	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/y_train.csv")
 
 	lr := linearmodels.LinearRegression{}
 
-	options := options.LROptions {
+	options := options.LROptions{
 		Estimator: options.NewOLSOptions(),
 	}
 
-	lr.Train(target, data, options)
+	lr.Train(target, trainData, options)
 
 	// expected hyper parameter estimations
-	expected := linearalgebra.NewColumnVector([]float64{0.95, 0.65})
+	expected := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/hyperparameters.csv")
 
-	if !testutils.AcceptableReslts(expected, lr.Hyperparameters) {
+	if !testutils.AcceptableResults(expected, lr.Hyperparameters, 0.001) {
 		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
 	}
 }

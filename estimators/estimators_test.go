@@ -48,7 +48,7 @@ func TestGradintDescent(t *testing.T) {
 
 	expected := linearalgebra.NewColumnVector([]float64{0.95, 0.65})
 
-	if !testutils.AcceptableReslts(expected, *gdr) {
+	if !testutils.AcceptableResults(expected, *gdr, 0.01) {
 		t.Error("Error expected result is ", expected, " but was", *gdr)
 	}
 }

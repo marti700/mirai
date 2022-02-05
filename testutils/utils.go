@@ -11,16 +11,19 @@ import (
 	"github.com/marti700/veritas/linearalgebra"
 )
 
-func AcceptableReslts(expected, actual linearalgebra.Matrix) bool {
+// Returns true if the difference between the expected and actual result are whith the delta parameter range
+func AcceptableResults(expected, actual linearalgebra.Matrix, delta float64) bool {
 	for i := range expected.Data {
 		absoluteDelta := math.Abs(expected.Data[i] - actual.Data[i])
-		if absoluteDelta > 2 || math.IsNaN(absoluteDelta) {
+		if (delta >= absoluteDelta && delta <=  absoluteDelta) || math.IsNaN(absoluteDelta) {
 			return false
 		}
 	}
 	return true
 }
 
+// Reads data from a csv file and returns the read data as a Matrix
+// this functiona assumes the data in the csv are numbers in the float64 range
 func ReadDataFromcsv(pathToFile string) linearalgebra.Matrix {
 	f, err := os.Open(pathToFile)
 	if err != nil {
