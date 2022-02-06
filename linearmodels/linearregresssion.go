@@ -8,8 +8,8 @@ import (
 
 // Linear model is an interface that wraps the basic behavior of linear models
 type LinearModel interface {
-	train(target linearalgebra.Matrix, data linearalgebra.Matrix, options options.LROptions)
-	predict(data linearalgebra.Matrix) float64
+	Train(target linearalgebra.Matrix, data linearalgebra.Matrix, options options.LROptions)
+	Predict(data linearalgebra.Matrix) linearalgebra.Matrix
 }
 
 type LinearRegression struct {
@@ -53,6 +53,7 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 }
 
 //gives a prediction based on the hyperparameters estimations obtained by train()
-func (m LinearRegression) predict(data linearalgebra.Matrix) float64 {
-	return 0
+func (m LinearRegression) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
+	data = data.InsertAt(linearalgebra.Ones(data.Row, 1), 0) //to take into considaration the bias term
+	return data.Mult(m.Hyperparameters)
 }

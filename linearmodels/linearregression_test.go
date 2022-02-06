@@ -26,6 +26,14 @@ func TestLinearRegressionTrainGD(t *testing.T) {
 	if !testutils.AcceptableResults(expected, lr.Hyperparameters, 0.001) {
 		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
 	}
+
+	//predicted test values
+	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/x_test.csv")
+	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/predictions.csv")
+
+	if !testutils.AcceptableResults(expectedPredictions, lr.Predict(testData), 0.001) {
+		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
+	}
 }
 
 func TestLinearRegressionTrainOLS(t *testing.T) {
@@ -46,4 +54,13 @@ func TestLinearRegressionTrainOLS(t *testing.T) {
 	if !testutils.AcceptableResults(expected, lr.Hyperparameters, 0.001) {
 		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
 	}
+
+	//predicted test values
+	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/x_test.csv")
+	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/predictions.csv")
+
+	if !testutils.AcceptableResults(expectedPredictions, lr.Predict(testData), 0.001) {
+		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
+	}
+
 }
