@@ -64,3 +64,25 @@ func TestLinearRegressionTrainOLS(t *testing.T) {
 	}
 
 }
+
+func TestRidgeRegressionTrainGD(t *testing.T) {
+	trainData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/x_train.csv")
+	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/y_train.csv")
+
+	lm := linearmodels.RidgeRegression{}
+
+	options := options.RidgeOptions{
+		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
+		Lambda:    1.0,
+	}
+
+	lm.Train(target, trainData, options)
+
+	// expected hyper parameter estimations
+	expected := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/hyperparameters.csv")
+
+	if !testutils.AcceptableResults(expected, lm.Hyperparameters, 0.001) {
+		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
+	}
+
+}

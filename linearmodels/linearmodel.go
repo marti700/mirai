@@ -16,3 +16,7 @@ type LinearRegression struct {
 	Hyperparameters linearalgebra.Matrix
 }
 
+// ridge regression model struct type
+type RidgeRegression struct {
+	Hyperparameters linearalgebra.Matrix
+}
