@@ -6,16 +6,6 @@ import (
 	"github.com/marti700/veritas/linearalgebra"
 )
 
-// Linear model is an interface that wraps the basic behavior of linear models
-type LinearModel interface {
-	Train(target linearalgebra.Matrix, data linearalgebra.Matrix, options options.LROptions)
-	Predict(data linearalgebra.Matrix) linearalgebra.Matrix
-}
-
-type LinearRegression struct {
-	Hyperparameters linearalgebra.Matrix
-}
-
 // trains a linear model
 // the target parameter is the variable to be predicted
 // the data parameter is the data observations represented as a matrix
