@@ -32,7 +32,7 @@ func (m *RidgeRegression) Train(target linearalgebra.Matrix, data linearalgebra.
 }
 
 //gives predictions based on the hyperparameters estimations obtained by Train()
-// TODO: implement Predict
 func (m *RidgeRegression) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
-	return linearalgebra.Matrix{}
+	data = data.InsertAt(linearalgebra.Ones(data.Row, 1), 0) //to take into considaration the bias term
+	return data.Mult(m.Hyperparameters)
 }

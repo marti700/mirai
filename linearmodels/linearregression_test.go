@@ -85,4 +85,11 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
 	}
 
+	//predicted test values
+	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/x_test.csv")
+	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/predictions.csv")
+
+	if !testutils.AcceptableResults(expectedPredictions, lm.Predict(testData), 0.001) {
+		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
+	}
 }
