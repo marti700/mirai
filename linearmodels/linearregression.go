@@ -9,7 +9,6 @@ import (
 // trains a linear model
 // the target parameter is the variable to be predicted
 // the data parameter is the data observations represented as a matrix
-// learningRate is the learning rate at which the model will learn
 // this function will set the hyperparameter directly in the reciver and will panic if
 // LROptions.Estimator = "gd" and LROptinos.LearningRate = 0
 func (m *LinearRegression) Train(target linearalgebra.Matrix,
@@ -42,7 +41,7 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 	}
 }
 
-//gives a prediction based on the hyperparameters estimations obtained by train()
+//gives predictions based on the hyperparameters estimations obtained by Train()
 func (m LinearRegression) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	data = data.InsertAt(linearalgebra.Ones(data.Row, 1), 0) //to take into considaration the bias term
 	return data.Mult(m.Hyperparameters)
