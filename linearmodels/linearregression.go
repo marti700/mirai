@@ -6,6 +6,20 @@ import (
 	"github.com/marti700/veritas/linearalgebra"
 )
 
+var regularizators = map[string]func(param, lambda float64) float64{}
+
+func init() {
+	none := func(param, lambda float64) float64 { return 0 }
+	l2 := func(param, lambda float64) float64 { return param * lambda * 2 }
+
+	regularizators[""] = none
+	regularizators["l2"] = l2
+}
+
+func regularizator(param float64, opt options.RegOptions) float64 {
+	return regularizators[opt.Type](param, opt.Lambda)
+}
+
 // trains a linear model
 // the target parameter is the variable to be predicted
 // the data parameter is the data observations represented as a matrix
@@ -17,7 +31,7 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 
 	if opt.Estimator.GetType() == "gd" {
 		learningRate := opt.Estimator.(options.GDOptions).LearningRate
-		if  learningRate == 0.0 {
+		if learningRate == 0.0 {
 			panic("Learning rate is 0")
 		}
 
@@ -29,7 +43,7 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 			currentModelResults := f.Mult(slopes)
 			for j := 0; j < f.Col; j++ {
 				predErr := tv.Substract(currentModelResults)
-				lossFunctionVals[j] = linearalgebra.ElementsSum(f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr))
+				lossFunctionVals[j] = linearalgebra.ElementsSum(f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr)) + regularizator(slopes.Get(j, 0), opt.Regularization)
 			}
 			return linearalgebra.NewColumnVector(lossFunctionVals)
 		}

@@ -69,11 +69,11 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 	trainData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/x_train.csv")
 	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/y_train.csv")
 
-	lm := linearmodels.RidgeRegression{}
+	lm := linearmodels.LinearRegression{}
 
-	options := options.RidgeOptions{
+	options := options.LROptions{
 		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
-		Lambda:    1.0,
+		Regularization: options.NewRegOptions("l2",1.0),
 	}
 
 	lm.Train(target, trainData, options)
