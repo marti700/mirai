@@ -11,9 +11,18 @@ var regularizators = map[string]func(param, lambda float64) float64{}
 func init() {
 	none := func(param, lambda float64) float64 { return 0 }
 	l2 := func(param, lambda float64) float64 { return param * lambda * 2 }
+	//using subgradient since the absolute value function derivative is not defined at zero
+	// see https://machinelearningcompass.com/machine_learning_math/subgradient_descent/
+	l1 := func(param, lambda float64) float64 {
+		if param <= 1 && param >= -1 {
+			return param
+		}
+		return param / 1
+	}
 
 	regularizators[""] = none
 	regularizators["l2"] = l2
+	regularizators["l1"] = l1
 }
 
 func regularizator(param float64, opt options.RegOptions) float64 {

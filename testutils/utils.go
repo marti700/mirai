@@ -15,7 +15,7 @@ import (
 func AcceptableResults(expected, actual linearalgebra.Matrix, delta float64) bool {
 	for i := range expected.Data {
 		absoluteDelta := math.Abs(expected.Data[i] - actual.Data[i])
-		if (delta >= absoluteDelta && delta <=  absoluteDelta) || math.IsNaN(absoluteDelta) {
+		if (delta <= absoluteDelta) || math.IsNaN(absoluteDelta) {
 			return false
 		}
 	}

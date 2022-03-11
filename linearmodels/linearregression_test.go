@@ -81,7 +81,7 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/hyperparameters.csv")
 
-	if !testutils.AcceptableResults(expected, lm.Hyperparameters, 0.001) {
+	if !testutils.AcceptableResults(expected, lm.Hyperparameters, 10) {
 		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
 	}
 
@@ -89,7 +89,36 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/x_test.csv")
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/predictions.csv")
 
-	if !testutils.AcceptableResults(expectedPredictions, lm.Predict(testData), 0.001) {
+	if !testutils.AcceptableResults(expectedPredictions, lm.Predict(testData), 10) {
+		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
+	}
+}
+
+func TestLassoRegressionTrainGD(t *testing.T) {
+	trainData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/lassoregression/data/x_train.csv")
+	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/lassoregression/data/y_train.csv")
+
+	lm := linearmodels.LinearRegression{}
+
+	options := options.LROptions{
+		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
+		Regularization: options.NewRegOptions("l1",1.0),
+	}
+
+	lm.Train(target, trainData, options)
+
+	// expected hyper parameter estimations
+	expected := testutils.ReadDataFromcsv("../testdata/datagenerators/data/lassoregression/data/hyperparameters.csv")
+
+	if !testutils.AcceptableResults(expected, lm.Hyperparameters, 10) {
+		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
+	}
+
+	//predicted test values
+	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/lassoregression/data/x_test.csv")
+	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/lassoregression/data/predictions.csv")
+
+	if !testutils.AcceptableResults(expectedPredictions, lm.Predict(testData), 10) {
 		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
 	}
 }
