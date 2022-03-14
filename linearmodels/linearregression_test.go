@@ -30,9 +30,10 @@ func TestLinearRegressionTrainGD(t *testing.T) {
 	//predicted test values
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/x_test.csv")
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/predictions.csv")
+	predicted := lr.Predict(testData)
 
-	if !testutils.AcceptableResults(expectedPredictions, lr.Predict(testData), 0.001) {
-		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
+	if !testutils.AcceptableResults(expectedPredictions, predicted, 50) {
+		t.Error("Error expected result is ", expected, " but was", predicted)
 	}
 }
 
@@ -58,9 +59,10 @@ func TestLinearRegressionTrainOLS(t *testing.T) {
 	//predicted test values
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/x_test.csv")
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/predictions.csv")
+	predicted := lr.Predict(testData)
 
-	if !testutils.AcceptableResults(expectedPredictions, lr.Predict(testData), 0.001) {
-		t.Error("Error expected result is ", expected, " but was", lr.Hyperparameters)
+	if !testutils.AcceptableResults(expectedPredictions, predicted, 50) {
+		t.Error("Error expected result is ", expected, " but was", predicted)
 	}
 
 }
@@ -72,8 +74,8 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 	lm := linearmodels.LinearRegression{}
 
 	options := options.LROptions{
-		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
-		Regularization: options.NewRegOptions("l2",1.0),
+		Estimator:      options.NewGDOptions(1000, 0.001, 0.00003),
+		Regularization: options.NewRegOptions("l2", 1.0),
 	}
 
 	lm.Train(target, trainData, options)
@@ -88,9 +90,10 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 	//predicted test values
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/x_test.csv")
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/ridgeregression/data/predictions.csv")
+	predicted := lm.Predict(testData)
 
-	if !testutils.AcceptableResults(expectedPredictions, lm.Predict(testData), 10) {
-		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
+	if !testutils.AcceptableResults(expectedPredictions, predicted, 50) {
+		t.Error("Error expected result is ", expected, " but was", predicted)
 	}
 }
 
@@ -101,8 +104,8 @@ func TestLassoRegressionTrainGD(t *testing.T) {
 	lm := linearmodels.LinearRegression{}
 
 	options := options.LROptions{
-		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
-		Regularization: options.NewRegOptions("l1",1.0),
+		Estimator:      options.NewGDOptions(1000, 0.001, 0.00003),
+		Regularization: options.NewRegOptions("l1", 1.0),
 	}
 
 	lm.Train(target, trainData, options)
@@ -117,8 +120,9 @@ func TestLassoRegressionTrainGD(t *testing.T) {
 	//predicted test values
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/lassoregression/data/x_test.csv")
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/lassoregression/data/predictions.csv")
+	predicted := lm.Predict(testData)
 
-	if !testutils.AcceptableResults(expectedPredictions, lm.Predict(testData), 10) {
-		t.Error("Error expected result is ", expected, " but was", lm.Hyperparameters)
+	if !testutils.AcceptableResults(expectedPredictions, predicted, 50) {
+		t.Error("Error expected result is ", expected, " but was", predicted)
 	}
 }
