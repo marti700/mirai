@@ -17,6 +17,6 @@ func TestGetGinis(t *testing.T) {
 
 	target := linearalgebra.NewColumnVector([]float64{1,2,1,3,4})
 
-	featuresGini(data,target)
+	selectSplit(data,target)
 
 }

@@ -39,32 +39,46 @@ func extractBins(data linearalgebra.Matrix, binsKeys []float64) map[float64]line
 	return bins
 }
 
-func gini_impurity(data linearalgebra.Matrix) float64 {
+func giniImpurity(data linearalgebra.Matrix) float64 {
 	classValueCounts := getValueCounts(data.GetCol(1))
 	var gini float64
 
 	for _, value := range classValueCounts {
-		pValue := float64(value)/float64(data.Row) // probability of getting this class
-		gini += pValue*pValue
+		pValue := float64(value) / float64(data.Row) // probability of getting this class
+		gini += pValue * pValue
 	}
 
-	return 1 -gini
+	return 1 - gini
 }
 
-func featuresGini(features, target linearalgebra.Matrix) {
-	featureTarget := features.GetCol(0).InsertAt(target, 1)
+func featuresGini(data linearalgebra.Matrix) float64 {
 
-	midPoints := getMidPoints(getUniqueValues(featureTarget.GetCol(0))) // mid points bin for this feature
-	featureBins := extractBins(featureTarget, midPoints)      // map of features bins where the keys are the midpoints
+	midPoints := getMidPoints(getUniqueValues(data.GetCol(0))) // mid points bin for this feature
+	featureBins := extractBins(data, midPoints)                // map of features bins where the keys are the midpoints
 
-	totalElements := featureTarget.Row // total number of elements in the feature
-	var tGini float64                  //total gini impurity of the feature
+	totalElements := data.Row // total number of elements in the feature
+	var tGini float64         //total gini impurity of the feature
 	for _, bin := range featureBins {
 		// binClassValueCounts := getValueCounts(bin.GetCol(0))
-		tGini += (float64(bin.Row) / float64(totalElements)) * gini_impurity(bin)
+		tGini += (float64(bin.Row) / float64(totalElements)) * giniImpurity(bin)
 	}
 
-	fmt.Println(tGini)
+	return tGini
+}
+
+func selectSplit(features, target linearalgebra.Matrix) int {
+
+	currentFeatureImp := 80.0       // current feature impurity initialized at 80.0 since its max value is 0.5
+	var minImpurityFeatureIndex int //holds the column index of the feature with the minimun gini impurity
+	for i := 0; i < features.Col; i++ {
+		featureTarget := features.GetCol(i).InsertAt(target, 1)
+		currentFeatureGini := featuresGini(featureTarget)
+		if currentFeatureImp > currentFeatureGini {
+			currentFeatureImp = currentFeatureGini
+			minImpurityFeatureIndex = i
+		}
+	}
+	return minImpurityFeatureIndex
 }
 
 // gets the unique values of a column vector
