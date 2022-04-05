@@ -13,9 +13,10 @@ import (
 )
 
 // Given data as a two column matrix, where the first column represents a feature and the second column the label for that feature
-// and a set of float64 keys. Builds a map on which the data for any key is less than the key itself
-func extractBins(data linearalgebra.Matrix, binsKeys []float64) map[float64]linearalgebra.Matrix {
+// Builds a map on which the data for any key is less than the key itself
+func extractBins(data linearalgebra.Matrix) map[float64]linearalgebra.Matrix {
 	bins := make(map[float64]linearalgebra.Matrix)
+	binsKeys := getMidPoints(getUniqueValues(data.GetCol(0))) // mid points bin for this feature
 
 	//first bin
 	bins[binsKeys[0]] = filterRows(data, func(e linearalgebra.Matrix) bool {
@@ -56,17 +57,10 @@ func giniImpurity(data linearalgebra.Matrix) float64 {
 	return 1 - gini
 }
 
-// Given a two column matrix where the first column represents the feature values and the last the labels of the feature
-// returns a map on which the data for any key is less than the key itself
-func getFeatureBins(data linearalgebra.Matrix) map[float64]linearalgebra.Matrix {
-	midPoints := getMidPoints(getUniqueValues(data.GetCol(0))) // mid points bin for this feature
-	return extractBins(data, midPoints)                        // map of features bins where the keys are the midpoints
-}
-
 // Calculates the total impurity for a given feature given as a two column matrix
 // where the first column represents the feature values and the second the labels of the feature
 func featuresGini(data linearalgebra.Matrix) float64 {
-	featureBins := getFeatureBins(data) // map of features bins where the keys are the midpoints
+	featureBins := extractBins(data) // map of features bins where the keys are the midpoints
 
 	totalElements := data.Row // total number of elements in the feature
 	var tGini float64         //total gini impurity of the feature
@@ -122,7 +116,7 @@ func Train(data, target linearalgebra.Matrix) {
 	// 1- Find best feature split
 	bestFeature := selectSplit(data, target)
 	// 2- find best sub-feature split (based on midpoints)
-	bFeatBin := bestFeatureBin(getFeatureBins(data.GetCol(bestFeature).InsertAt(target, 1)))
+	bFeatBin := bestFeatureBin(extractBins(data.GetCol(bestFeature).InsertAt(target, 1)))
 	fmt.Println(bFeatBin)
 	// 3- split the data based in 1 and 2 (to get the left and right leaves of the tree)
 	// 4- recursivly build the tree
