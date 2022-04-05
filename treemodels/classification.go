@@ -51,10 +51,13 @@ func giniImpurity(data linearalgebra.Matrix) float64 {
 	return 1 - gini
 }
 
-func featuresGini(data linearalgebra.Matrix) float64 {
-
+func getFeatureBins(data linearalgebra.Matrix) map[float64]linearalgebra.Matrix {
 	midPoints := getMidPoints(getUniqueValues(data.GetCol(0))) // mid points bin for this feature
-	featureBins := extractBins(data, midPoints)                // map of features bins where the keys are the midpoints
+	return extractBins(data, midPoints)                        // map of features bins where the keys are the midpoints
+}
+
+func featuresGini(data linearalgebra.Matrix) float64 {
+	featureBins := getFeatureBins(data)                // map of features bins where the keys are the midpoints
 
 	totalElements := data.Row // total number of elements in the feature
 	var tGini float64         //total gini impurity of the feature
@@ -66,8 +69,30 @@ func featuresGini(data linearalgebra.Matrix) float64 {
 	return tGini
 }
 
-func selectSplit(features, target linearalgebra.Matrix) int {
+func bestFeatureBin(bins map[float64]linearalgebra.Matrix) float64 {
+	//selected bin will hold the bin with the lowest impurity. It is initialized to 80.0 since impurity max value is 0.5
+	sBin := 80.0
+	impurities := make([]float64, 0, len(bins)+1)
+	impurities = append(impurities, 42)
+	keys := make([]float64, 0, len(bins)+1)
+	keys = append(keys, 42)
+	for key, bin := range bins {
+		currentBinImpurity := giniImpurity(bin)
+		if impurities[len(impurities)-1] > currentBinImpurity {
+			sBin = key
+		}
+		if impurities[len(impurities)-1] == currentBinImpurity {
+			if bins[keys[len(keys)-1]].Row < bin.Row {
+				sBin = key
+			}
+		}
+		impurities = append(impurities, currentBinImpurity)
+		keys = append(keys, key)
+	}
+	return sBin
+}
 
+func selectSplit(features, target linearalgebra.Matrix) int {
 	currentFeatureImp := 80.0       // current feature impurity initialized at 80.0 since its max value is 0.5
 	var minImpurityFeatureIndex int //holds the column index of the feature with the minimun gini impurity
 	for i := 0; i < features.Col; i++ {
@@ -79,6 +104,16 @@ func selectSplit(features, target linearalgebra.Matrix) int {
 		}
 	}
 	return minImpurityFeatureIndex
+}
+
+func Train(data, target linearalgebra.Matrix) {
+	// 1- Find best feature split
+	bestFeature := selectSplit(data, target)
+	// 2- find best sub-feature split (based on midpoints)
+	bFeatBin := bestFeatureBin(getFeatureBins(data.GetCol(bestFeature).InsertAt(target,1)))
+	fmt.Println(bFeatBin)
+	// 3- split the data based in 1 and 2 (to get the left and right leaves of the tree)
+	// 4- recursivly build the tree
 }
 
 // gets the unique values of a column vector
@@ -108,7 +143,6 @@ func getUniqueValues(target linearalgebra.Matrix) linearalgebra.Matrix {
 func getMidPoints(data linearalgebra.Matrix) []float64 {
 	sort.Float64s(data.Data)
 	r := append(data.Data, data.Data[len(data.Data)-1]+1) //adds extra element to obtain a midpoint above the last number
-	fmt.Println(r)
 	midPoints := make([]float64, 0, len(r))
 
 	i := 0
@@ -174,6 +208,23 @@ func filterRows(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) 
 			}
 		}
 	}
-
 	return newMatrix
+}
+
+func filterRows2(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) (linearalgebra.Matrix, linearalgebra.Matrix) {
+	var m1 linearalgebra.Matrix
+	var m2 linearalgebra.Matrix
+	for i := 0; i < data.Row; i++ {
+		currentRow := data.GetRow(i)
+		if f(currentRow) && len(m1.Data) == 0 {
+			m1 = currentRow
+		} else if !f(currentRow) && len(m2.Data) == 0 {
+			m1 = currentRow
+		} else if f(currentRow) {
+			m1 = m1.InsertAt(currentRow, -1)
+		} else {
+			m2 = m2.InsertAt(currentRow, 0)
+		}
+	}
+	return m1, m2
 }
