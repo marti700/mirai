@@ -12,6 +12,8 @@ import (
 	"github.com/marti700/veritas/linearalgebra"
 )
 
+// Given data as a two column matrix, where the first column represents a feature and the second column the label for that feature
+// and a set of float64 keys. Builds a map on which the data for any key is less than the key itself
 func extractBins(data linearalgebra.Matrix, binsKeys []float64) map[float64]linearalgebra.Matrix {
 	bins := make(map[float64]linearalgebra.Matrix)
 
@@ -39,6 +41,9 @@ func extractBins(data linearalgebra.Matrix, binsKeys []float64) map[float64]line
 	return bins
 }
 
+// calculates the gini impurity of a feature
+// feature must be given as a two column matrix where the first column represents the feature values
+// and the last column the labels for the feature
 func giniImpurity(data linearalgebra.Matrix) float64 {
 	classValueCounts := getValueCounts(data.GetCol(1))
 	var gini float64
@@ -51,24 +56,30 @@ func giniImpurity(data linearalgebra.Matrix) float64 {
 	return 1 - gini
 }
 
+// Given a two column matrix where the first column represents the feature values and the last the labels of the feature
+// returns a map on which the data for any key is less than the key itself
 func getFeatureBins(data linearalgebra.Matrix) map[float64]linearalgebra.Matrix {
 	midPoints := getMidPoints(getUniqueValues(data.GetCol(0))) // mid points bin for this feature
 	return extractBins(data, midPoints)                        // map of features bins where the keys are the midpoints
 }
 
+// Calculates the total impurity for a given feature given as a two column matrix
+// where the first column represents the feature values and the second the labels of the feature
 func featuresGini(data linearalgebra.Matrix) float64 {
-	featureBins := getFeatureBins(data)                // map of features bins where the keys are the midpoints
+	featureBins := getFeatureBins(data) // map of features bins where the keys are the midpoints
 
 	totalElements := data.Row // total number of elements in the feature
 	var tGini float64         //total gini impurity of the feature
 	for _, bin := range featureBins {
-		// binClassValueCounts := getValueCounts(bin.GetCol(0))
 		tGini += (float64(bin.Row) / float64(totalElements)) * giniImpurity(bin)
 	}
 
 	return tGini
 }
 
+//finds the best sub-feature to be used for tree splitting
+//This function selects the sub-feature with the lowest impurity, if two subfeatures have the same impurity
+// the one with more rows is selected.
 func bestFeatureBin(bins map[float64]linearalgebra.Matrix) float64 {
 	//selected bin will hold the bin with the lowest impurity. It is initialized to 80.0 since impurity max value is 0.5
 	sBin := 80.0
@@ -92,6 +103,7 @@ func bestFeatureBin(bins map[float64]linearalgebra.Matrix) float64 {
 	return sBin
 }
 
+// Returns the index of the best splitting feature, given the features as a matrix and the labels as a vector
 func selectSplit(features, target linearalgebra.Matrix) int {
 	currentFeatureImp := 80.0       // current feature impurity initialized at 80.0 since its max value is 0.5
 	var minImpurityFeatureIndex int //holds the column index of the feature with the minimun gini impurity
@@ -110,7 +122,7 @@ func Train(data, target linearalgebra.Matrix) {
 	// 1- Find best feature split
 	bestFeature := selectSplit(data, target)
 	// 2- find best sub-feature split (based on midpoints)
-	bFeatBin := bestFeatureBin(getFeatureBins(data.GetCol(bestFeature).InsertAt(target,1)))
+	bFeatBin := bestFeatureBin(getFeatureBins(data.GetCol(bestFeature).InsertAt(target, 1)))
 	fmt.Println(bFeatBin)
 	// 3- split the data based in 1 and 2 (to get the left and right leaves of the tree)
 	// 4- recursivly build the tree
@@ -157,6 +169,8 @@ func getMidPoints(data linearalgebra.Matrix) []float64 {
 	return midPoints
 }
 
+// recieves a column vector as input and returns a map wich keys are the values of the vector
+// and its values the number of times the key appears in the vector
 func getValueCounts(target linearalgebra.Matrix) map[float64]int {
 	if !isVector(target) {
 		panic("target must be a column Vector")
@@ -196,6 +210,8 @@ func filter(slice []float64, f func(e float64) bool) []float64 {
 	return newSlice
 }
 
+// given a matrix and a boolean function of the type matrix -> bool returns a new matrix for which the function returns true
+// this function operates on the rows, so each row of the provided matrix will be passed to the boolean function
 func filterRows(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) linearalgebra.Matrix {
 	var newMatrix linearalgebra.Matrix
 	for i := 0; i < data.Row; i++ {
