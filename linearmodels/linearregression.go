@@ -31,6 +31,7 @@ func sign(x float64) float64 {
 	return 1
 }
 
+// returns the regularization penalty
 func regularizator(param float64, opt options.RegOptions) float64 {
 	return regularizators[opt.Type](param, opt.Lambda)
 }

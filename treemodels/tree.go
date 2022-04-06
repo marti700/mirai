@@ -7,6 +7,7 @@ type Tree struct {
 	Right *Tree
 	Condition float64
 	Data linearalgebra.Matrix
+	Predict float64
 }
 
 

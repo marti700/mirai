@@ -43,14 +43,13 @@ func extractBins(data linearalgebra.Matrix) map[float64]linearalgebra.Matrix {
 }
 
 // calculates the gini impurity of a feature
-// feature must be given as a two column matrix where the first column represents the feature values
-// and the last column the labels for the feature
-func giniImpurity(data linearalgebra.Matrix) float64 {
-	classValueCounts := getValueCounts(data.GetCol(1))
+// this function recieves the classification classes asa a column vector
+func giniImpurity(classes linearalgebra.Matrix) float64 {
+	classValueCounts := getValueCounts(classes)
 	var gini float64
 
 	for _, value := range classValueCounts {
-		pValue := float64(value) / float64(data.Row) // probability of getting this class
+		pValue := float64(value) / float64(classes.Row) // probability of getting this class
 		gini += pValue * pValue
 	}
 
@@ -59,13 +58,13 @@ func giniImpurity(data linearalgebra.Matrix) float64 {
 
 // Calculates the total impurity for a given feature given as a two column matrix
 // where the first column represents the feature values and the second the labels of the feature
-func featuresGini(data linearalgebra.Matrix) float64 {
+func featureGini(data linearalgebra.Matrix) float64 {
 	featureBins := extractBins(data) // map of features bins where the keys are the midpoints
 
 	totalElements := data.Row // total number of elements in the feature
 	var tGini float64         //total gini impurity of the feature
 	for _, bin := range featureBins {
-		tGini += (float64(bin.Row) / float64(totalElements)) * giniImpurity(bin)
+		tGini += (float64(bin.Row) / float64(totalElements)) * giniImpurity(bin.GetCol(1))
 	}
 
 	return tGini
@@ -82,7 +81,8 @@ func bestFeatureBin(bins map[float64]linearalgebra.Matrix) float64 {
 	keys := make([]float64, 0, len(bins)+1)
 	keys = append(keys, 42)
 	for key, bin := range bins {
-		currentBinImpurity := giniImpurity(bin)
+		currentBinClasses := bin.GetCol(bin.Col-1)
+		currentBinImpurity := giniImpurity(currentBinClasses)
 		if impurities[len(impurities)-1] > currentBinImpurity {
 			sBin = key
 		}
@@ -103,7 +103,7 @@ func selectSplit(features, target linearalgebra.Matrix) int {
 	var minImpurityFeatureIndex int //holds the column index of the feature with the minimun gini impurity
 	for i := 0; i < features.Col; i++ {
 		featureTarget := features.GetCol(i).InsertAt(target, 1)
-		currentFeatureGini := featuresGini(featureTarget)
+		currentFeatureGini := featureGini(featureTarget)
 		if currentFeatureImp > currentFeatureGini {
 			currentFeatureImp = currentFeatureGini
 			minImpurityFeatureIndex = i
@@ -113,13 +113,36 @@ func selectSplit(features, target linearalgebra.Matrix) int {
 }
 
 func Train(data, target linearalgebra.Matrix) {
+	featureTarget := data.InsertAt(target, data.Col)
+	fmt.Println(*buildTree(featureTarget))
+}
+
+func buildTree(data linearalgebra.Matrix) *Tree {
+	target := data.GetCol(data.Col-1)
+	if giniImpurity(target) == 0 {
+		return &Tree{
+			Left: nil,
+			Right: nil,
+			Condition: 0,
+			Predict: data.Get(0,data.Col-1),
+		}
+	}
+
 	// 1- Find best feature split
 	bestFeature := selectSplit(data, target)
 	// 2- find best sub-feature split (based on midpoints)
 	bFeatBin := bestFeatureBin(extractBins(data.GetCol(bestFeature).InsertAt(target, 1)))
-	fmt.Println(bFeatBin)
 	// 3- split the data based in 1 and 2 (to get the left and right leaves of the tree)
+	left, right := filterRows2(data, func(r linearalgebra.Matrix) bool {
+		return r.Get(0, bestFeature) <= bFeatBin
+	})
 	// 4- recursivly build the tree
+	return &Tree{
+		Left: buildTree(left),
+		Right: buildTree(right),
+		Condition: bFeatBin,
+		Data: data,
+	}
 }
 
 // gets the unique values of a column vector
@@ -229,9 +252,9 @@ func filterRows2(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool)
 		if f(currentRow) && len(m1.Data) == 0 {
 			m1 = currentRow
 		} else if !f(currentRow) && len(m2.Data) == 0 {
-			m1 = currentRow
+			m2 = currentRow
 		} else if f(currentRow) {
-			m1 = m1.InsertAt(currentRow, -1)
+			m1 = m1.InsertAt(currentRow, 0)
 		} else {
 			m2 = m2.InsertAt(currentRow, 0)
 		}
