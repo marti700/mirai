@@ -80,7 +80,6 @@ func generateDotFile(parent *Tree, str string, node int) string {
 				%s ->  %s ;
 				`, cond2, parentID, nod2)
 			nodeID++
-			queue = append(queue, *cNode.Right)
 
 			if cNode.Right.Left != nil {
 				queue = append(queue, *cNode.Left)
