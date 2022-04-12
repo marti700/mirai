@@ -6,7 +6,6 @@ package treemodels
 // 2- split de data
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/marti700/veritas/linearalgebra"
@@ -112,9 +111,9 @@ func selectSplit(features, target linearalgebra.Matrix) int {
 	return minImpurityFeatureIndex
 }
 
-func Train(data, target linearalgebra.Matrix) {
+func Train(data, target linearalgebra.Matrix) *Tree {
 	featureTarget := data.InsertAt(target, data.Col)
-	fmt.Println(*buildTree(featureTarget))
+	return buildTree(featureTarget)
 }
 
 func buildTree(data linearalgebra.Matrix) *Tree {

@@ -17,6 +17,7 @@ func TestGetGinis(t *testing.T) {
 
 	target := linearalgebra.NewColumnVector([]float64{1,2,1,3,4})
 
-	Train(data,target)
+
+	Train(data,target).toDotFile()
 
 }
