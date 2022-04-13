@@ -145,6 +145,25 @@ func buildTree(data linearalgebra.Matrix) *Tree {
 	}
 }
 
+func Predict(data linearalgebra.Matrix, t *Tree) linearalgebra.Matrix {
+	predictions := make([]float64, data.Row)
+	for i := 0; i< data.Row;i++ {
+		predictions[i] = classify(data.GetRow(i), t)
+	}
+	return linearalgebra.NewColumnVector(predictions)
+}
+
+func classify(data linearalgebra.Matrix, t *Tree) float64 {
+	evFeature := t.feature
+	if t.Left == nil && t.Right == nil {
+		return t.Predict
+	}
+	if data.Get(0,evFeature) <= t.Condition {
+		return classify(data, t.Left)
+	}
+	return classify(data, t.Right)
+}
+
 // gets the unique values of a column vector
 // target: is the vector from which the unique values will be extracted. It must be a column vector
 // returns a column vector
