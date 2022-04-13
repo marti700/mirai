@@ -2,6 +2,7 @@ package treemodels
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -25,14 +26,18 @@ func (t *Tree) Insert(direction string, tree *Tree) {
 	}
 }
 
-func (t *Tree) toDotFile() {
+func (t *Tree) Plot() {
 	dotStr := `digraph Tree {
 		node [shape=box, style="filled, rounded", fontname=helvetica] ;
 		edge [fontname=helvetica] ;
 		`
 	tStr := generateDotFile(t, dotStr, 0)
 
-	f, _ := os.Create("tree.dot")
+	f, err := os.Create("tree.dot")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
 
 	f.WriteString(tStr)
 
