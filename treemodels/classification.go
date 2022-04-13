@@ -139,6 +139,7 @@ func buildTree(data linearalgebra.Matrix) *Tree {
 	return &Tree{
 		Left: buildTree(left),
 		Right: buildTree(right),
+		feature: bestFeature,
 		Condition: bFeatBin,
 		Data: data,
 	}
