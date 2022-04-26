@@ -6,6 +6,8 @@ package treemodels
 // 2- split de data
 
 import (
+	// "fmt"
+	"fmt"
 	"sort"
 
 	"github.com/marti700/veritas/linearalgebra"
@@ -42,7 +44,7 @@ func extractBins(data linearalgebra.Matrix) map[float64]linearalgebra.Matrix {
 }
 
 // calculates the gini impurity of a feature
-// this function recieves the classification classes asa a column vector
+// this function recieves the classification classes as a column vector
 func giniImpurity(classes linearalgebra.Matrix) float64 {
 	classValueCounts := getValueCounts(classes)
 	var gini float64
@@ -55,15 +57,34 @@ func giniImpurity(classes linearalgebra.Matrix) float64 {
 	return 1 - gini
 }
 
+// // Calculates the total impurity for a given feature given as a two column matrix
+// // where the first column represents the feature values and the second the labels of the feature
+// func featureGini(data linearalgebra.Matrix) float64 {
+// 	featureBins := extractBins(data) // map of features bins where the keys are the midpoints
+
+// 	totalElements := data.Row // total number of elements in the feature
+// 	var tGini float64         //total gini impurity of the feature
+// 	for _, bin := range featureBins {
+// 		tGini += (float64(bin.Row) / float64(totalElements)) * giniImpurity(bin.GetCol(1))
+// 	}
+
+// 	return tGini
+// }
+
 // Calculates the total impurity for a given feature given as a two column matrix
 // where the first column represents the feature values and the second the labels of the feature
-func featureGini(data linearalgebra.Matrix) float64 {
-	featureBins := extractBins(data) // map of features bins where the keys are the midpoints
+func fGini(data linearalgebra.Matrix) float64 {
+	featValues := getValueCounts(data.GetCol(0))
+	// targetValues := getValueCounts(data.GetCol(1))
+	var tGini float64
 
-	totalElements := data.Row // total number of elements in the feature
-	var tGini float64         //total gini impurity of the feature
-	for _, bin := range featureBins {
-		tGini += (float64(bin.Row) / float64(totalElements)) * giniImpurity(bin.GetCol(1))
+	for key, val := range featValues {
+		tempDat := filterRows(data, func(r linearalgebra.Matrix) bool {
+			return r.Get(0, 0) == key
+		})
+
+		tGini += float64(val/data.Row) * giniImpurity(tempDat.GetCol(1))
+
 	}
 
 	return tGini
@@ -80,7 +101,7 @@ func bestFeatureBin(bins map[float64]linearalgebra.Matrix) float64 {
 	keys := make([]float64, 0, len(bins)+1)
 	keys = append(keys, 42)
 	for key, bin := range bins {
-		currentBinClasses := bin.GetCol(bin.Col-1)
+		currentBinClasses := bin.GetCol(bin.Col - 1)
 		currentBinImpurity := giniImpurity(currentBinClasses)
 		if impurities[len(impurities)-1] > currentBinImpurity {
 			sBin = key
@@ -97,12 +118,12 @@ func bestFeatureBin(bins map[float64]linearalgebra.Matrix) float64 {
 }
 
 // Returns the index of the best splitting feature, given the features as a matrix and the labels as a vector
-func selectSplit(features, target linearalgebra.Matrix) int {
+func selectSplit(features linearalgebra.Matrix) int {
 	currentFeatureImp := 80.0       // current feature impurity initialized at 80.0 since its max value is 0.5
 	var minImpurityFeatureIndex int //holds the column index of the feature with the minimun gini impurity
 	for i := 0; i < features.Col; i++ {
-		featureTarget := features.GetCol(i).InsertAt(target, 1)
-		currentFeatureGini := featureGini(featureTarget)
+		featureTarget := features.GetCol(i).InsertAt(features.GetCol(features.Col-1), 1)
+		currentFeatureGini := fGini(featureTarget)
 		if currentFeatureImp > currentFeatureGini {
 			currentFeatureImp = currentFeatureGini
 			minImpurityFeatureIndex = i
@@ -111,43 +132,108 @@ func selectSplit(features, target linearalgebra.Matrix) int {
 	return minImpurityFeatureIndex
 }
 
+// 1- sort feature data
+// 2- get midpoints
+// 3- get feature subtries
+// 4- get impurity
+
+func selectBestSplit(data linearalgebra.Matrix) int {
+	selectedImp := 42.0
+	var bestFeatureIndex int
+	for i := 0; i < data.Col-1; i++ {
+		currentFeature := data.GetCol(i)
+		featureTarget := currentFeature.InsertAt(data.GetCol(data.Col-1), 1)
+		midPoints := getMidPoints(currentFeature)
+		fImpurities := make([]float64, len(midPoints))
+		for j := 0; j < len(midPoints); j++ {
+			less := filterRows(featureTarget, func(r linearalgebra.Matrix) bool {
+				return r.Get(0, 0) < midPoints[j]
+			})
+
+			greater := filterRows(featureTarget, func(r linearalgebra.Matrix) bool {
+				return r.Get(0, 0) > midPoints[j]
+			})
+
+			fImpurities[j] = (float64(less.Row)/float64(currentFeature.Row))*wrapImp(less) + (float64(greater.Row)/float64(currentFeature.Row))*wrapImp(greater)
+		}
+		currentFeatureImp := average(fImpurities)
+
+		if selectedImp > currentFeatureImp {
+			bestFeatureIndex = i
+			selectedImp = currentFeatureImp
+		}
+	}
+
+	return bestFeatureIndex
+}
+
+func wrapImp(m linearalgebra.Matrix) float64 {
+	if m.Row == 0 {
+		return 0.0
+	}
+	return giniImpurity(m.GetCol(1))
+}
+
+func average(data []float64) float64 {
+	var sum float64
+	for _, elm := range data {
+		sum += elm
+	}
+
+	return sum / float64(len(data))
+}
+
 func Train(data, target linearalgebra.Matrix) *Tree {
 	featureTarget := data.InsertAt(target, data.Col)
 	return buildTree(featureTarget)
 }
 
 func buildTree(data linearalgebra.Matrix) *Tree {
-	target := data.GetCol(data.Col-1)
+	if len(data.Data) == 0 {
+		return &Tree{
+			Left:      nil,
+			Right:     nil,
+			feature:   0,
+			Condition: 0,
+			Data:      data,
+			Predict:   -1,
+		}
+	}
+	target := data.GetCol(data.Col - 1)
 	if giniImpurity(target) == 0 {
 		return &Tree{
-			Left: nil,
-			Right: nil,
+			Left:      nil,
+			Right:     nil,
+			feature:   0,
 			Condition: 0,
-			Predict: data.Get(0,data.Col-1),
+			Data:      data,
+			Predict:   data.Get(0, data.Col-1),
 		}
 	}
 
 	// 1- Find best feature split
-	bestFeature := selectSplit(data, target)
+	bestFeature := selectBestSplit(data)
+	fmt.Println(bestFeature)
 	// 2- find best sub-feature split (based on midpoints)
 	bFeatBin := bestFeatureBin(extractBins(data.GetCol(bestFeature).InsertAt(target, 1)))
-	// 3- split the data based in 1 and 2 (to get the left and right leaves of the tree)
+	// 3- split the data based in 1 and 2 (to get the left and right branches of the tree)
 	left, right := filterRows2(data, func(r linearalgebra.Matrix) bool {
 		return r.Get(0, bestFeature) <= bFeatBin
+
 	})
-	// 4- recursivly build the tree
+	// 4- recursively build the tree
 	return &Tree{
-		Left: buildTree(left),
-		Right: buildTree(right),
-		feature: bestFeature,
+		Left:      buildTree(left),
+		Right:     buildTree(right),
+		feature:   bestFeature,
 		Condition: bFeatBin,
-		Data: data,
+		Data:      data,
 	}
 }
 
 func Predict(data linearalgebra.Matrix, t *Tree) linearalgebra.Matrix {
 	predictions := make([]float64, data.Row)
-	for i := 0; i< data.Row;i++ {
+	for i := 0; i < data.Row; i++ {
 		predictions[i] = classify(data.GetRow(i), t)
 	}
 	return linearalgebra.NewColumnVector(predictions)
@@ -158,7 +244,7 @@ func classify(data linearalgebra.Matrix, t *Tree) float64 {
 	if t.Left == nil && t.Right == nil {
 		return t.Predict
 	}
-	if data.Get(0,evFeature) <= t.Condition {
+	if data.Get(0, evFeature) <= t.Condition {
 		return classify(data, t.Left)
 	}
 	return classify(data, t.Right)
@@ -246,7 +332,7 @@ func filter(slice []float64, f func(e float64) bool) []float64 {
 	return newSlice
 }
 
-// given a matrix and a boolean function of the type matrix -> bool returns a new matrix for which the function returns true
+// given a matrix and a boolean function of the type matrix -> bool returns a new matrix with the elements for what the function returns true
 // this function operates on the rows, so each row of the provided matrix will be passed to the boolean function
 func filterRows(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) linearalgebra.Matrix {
 	var newMatrix linearalgebra.Matrix

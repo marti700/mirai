@@ -1,6 +1,7 @@
 package treemodels
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/marti700/mirai/testutils"
@@ -16,12 +17,35 @@ func TestGetGinis(t *testing.T) {
 		{3,4,10},
 	})
 
+
+	fmt.Print("")
 	target := linearalgebra.NewColumnVector([]float64{1,2,1,3,4})
 
+	predicted := Predict(data, Train(data, target))
 
-	predicted := Predict(data, Train(data,target))
 	if !testutils.AcceptableResults(target, predicted, 0) {
-		t.Error("Error expected result is ", target, " but was", predicted)
+			t.Error("Error expected result is ", target, " but was", predicted)
+		}
+
+}
+
+func TestGetGinis1(t *testing.T) {
+
+	trainData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/x_train.csv")
+	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/y_train.csv")
+
+
+	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/x_test.csv")
+	predicted := Predict(testData, Train(trainData, target))
+	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/predictions.csv")
+
+
+	Train(trainData, target).Plot()
+
+
+	if !testutils.AcceptableResults(expectedPredictions, predicted, 0) {
+		t.Error("Error expected result is ", expectedPredictions, " but was", predicted)
 	}
 
 }
+
