@@ -137,14 +137,16 @@ func selectSplit(features linearalgebra.Matrix) int {
 // 3- get feature subtries
 // 4- get impurity
 
-func selectBestSplit(data linearalgebra.Matrix) int {
+func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 	selectedImp := 42.0
 	var bestFeatureIndex int
+	var bestMidPoint float64
 	for i := 0; i < data.Col-1; i++ {
 		currentFeature := data.GetCol(i)
 		featureTarget := currentFeature.InsertAt(data.GetCol(data.Col-1), 1)
 		midPoints := getMidPoints(currentFeature)
 		fImpurities := make([]float64, len(midPoints))
+
 		for j := 0; j < len(midPoints); j++ {
 			less := filterRows(featureTarget, func(r linearalgebra.Matrix) bool {
 				return r.Get(0, 0) < midPoints[j]
@@ -153,7 +155,6 @@ func selectBestSplit(data linearalgebra.Matrix) int {
 			greater := filterRows(featureTarget, func(r linearalgebra.Matrix) bool {
 				return r.Get(0, 0) > midPoints[j]
 			})
-
 			fImpurities[j] = (float64(less.Row)/float64(currentFeature.Row))*wrapImp(less) + (float64(greater.Row)/float64(currentFeature.Row))*wrapImp(greater)
 		}
 		currentFeatureImp := average(fImpurities)
@@ -161,10 +162,24 @@ func selectBestSplit(data linearalgebra.Matrix) int {
 		if selectedImp > currentFeatureImp {
 			bestFeatureIndex = i
 			selectedImp = currentFeatureImp
+			bestMidPoint = midPoints[min(fImpurities)]
 		}
 	}
 
-	return bestFeatureIndex
+	return bestFeatureIndex, bestMidPoint
+}
+
+// returns the index of the lowest value of this slice
+func min(s []float64) int {
+	min := 42.0
+	var idx int
+	for i, val := range s {
+		if min > val {
+			min = val
+			idx = i
+		}
+	}
+	return idx
 }
 
 func wrapImp(m linearalgebra.Matrix) float64 {
@@ -212,10 +227,10 @@ func buildTree(data linearalgebra.Matrix) *Tree {
 	}
 
 	// 1- Find best feature split
-	bestFeature := selectBestSplit(data)
+	bestFeature, bFeatBin := selectBestSplit(data)
 	fmt.Println(bestFeature)
 	// 2- find best sub-feature split (based on midpoints)
-	bFeatBin := bestFeatureBin(extractBins(data.GetCol(bestFeature).InsertAt(target, 1)))
+	// bFeatBin := bestFeatureBin(extractBins(data.GetCol(bestFeature).InsertAt(target, 1)))
 	// 3- split the data based in 1 and 2 (to get the left and right branches of the tree)
 	left, right := filterRows2(data, func(r linearalgebra.Matrix) bool {
 		return r.Get(0, bestFeature) <= bFeatBin
