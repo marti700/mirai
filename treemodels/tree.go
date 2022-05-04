@@ -12,7 +12,7 @@ import (
 type Tree struct {
 	Left      *Tree
 	Right     *Tree
-	feature		int
+	feature   int
 	Condition float64
 	Data      linearalgebra.Matrix
 	Predict   float64
@@ -54,7 +54,7 @@ func generateDotFile(parent *Tree, str string, node int) string {
 	cond := strconv.FormatFloat(parent.Condition, 'E', -1, 64)
 	nod := strconv.Itoa(parentNodeID)
 	str = str + nod + fmt.Sprintf(`[label="X[%d] <= %s "] ;
-	`,parent.feature, cond)
+	`, parent.feature, cond)
 	nodeID++
 
 	for len(queue) != 0 {
@@ -63,41 +63,51 @@ func generateDotFile(parent *Tree, str string, node int) string {
 		parentID := strconv.Itoa(parentNodeID)
 
 		if cNode.Left != nil {
-			cond1 := strconv.FormatFloat(parent.Left.Condition, 'E', -1, 64)
+			queue = append(queue, *cNode.Left)
 			nod1 := strconv.Itoa(nodeID)
 
-			str = str + nod1 + fmt.Sprintf(`[label="X[%d] <= %s "] ;
+			if !isTerminalNode(cNode.Left) {
+				str = str + nod1 + fmt.Sprintf(`[label="X[%d] <= %f "] ;
 				%s ->  %s ;
-				`, cNode.feature, cond1, parentID, nod1)
+				`, cNode.Left.feature, cNode.Left.Condition, parentID, nod1)
 
-			nodeID++
-			if cNode.Left.Left != nil {
-				queue = append(queue, *cNode.Left)
-			}
-			if cNode.Left.Right != nil {
-				queue = append(queue, *cNode.Right)
+				nodeID++
+			} else {
+				str = str + nod1 + fmt.Sprintf(`[label="class: %f "] ;
+				%s ->  %s ;
+				`, cNode.Left.Predict, parentID, nod1)
+
+				nodeID++
 			}
 		}
 
 		if cNode.Right != nil {
-			cond2 := strconv.FormatFloat(parent.Right.Condition, 'E', -1, 64)
+			queue = append(queue, *cNode.Right)
 			nod2 := strconv.Itoa(nodeID)
-			str = str + nod2 + fmt.Sprintf(`[label="X[%d] <= %s "] ;
-				%s ->  %s ;
-				`, cNode.feature, cond2, parentID, nod2)
-			nodeID++
 
-			if cNode.Right.Left != nil {
-				queue = append(queue, *cNode.Left)
-			}
-			if cNode.Right.Right != nil {
-				queue = append(queue, *cNode.Right)
+			if !isTerminalNode(cNode.Right) {
+				str = str + nod2 + fmt.Sprintf(`[label="X[%d] <= %f "] ;
+				%s ->  %s ;
+				`, cNode.Right.feature, cNode.Right.Condition, parentID, nod2)
+				nodeID++
+			} else {
+				str = str + nod2 + fmt.Sprintf(`[label="class: %f "] ;
+				%s ->  %s ;
+				`, cNode.Right.Predict, parentID, nod2)
+
+				nodeID++
 			}
 		}
 
 		parentNodeID++
-
 	}
 
-	return str+"}"
+	return str + "}"
+}
+
+func isTerminalNode(node *Tree) bool {
+	if node.Left == nil && node.Right == nil {
+		return true
+	}
+	return false
 }
