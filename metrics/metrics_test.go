@@ -25,8 +25,8 @@ func TestAcc(t *testing.T) {
 	expected1 := 0.8333333333333334
 	expected2 := 0.90
 
-	acc1 := acc(predicted1, actual)
-	acc2 := acc(predicted2, actual)
+	acc1 := Acc(predicted1, actual)
+	acc2 := Acc(predicted2, actual)
 
 	if expected1 != acc1 {
 		t.Error("Expected result is: ",expected1, "but was :", acc1 )

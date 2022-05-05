@@ -15,7 +15,7 @@ func MeanSquareError(actual, predicted linearalgebra.Matrix) float64 {
 // the predicted argument is the data used for testing the model, the one we want to classify
 // the actual argument are the real classes of the dataset
 // both predicted and actual must be column vectors of the same dimensions, if they are not this function will panic
-func acc(predicted, actual linearalgebra.Matrix) float64 {
+func Acc(predicted, actual linearalgebra.Matrix) float64 {
 	// TODO: Panic if predicted or actual are not vectors
 	// TODO: Panic if predicted and actual are not of the same size
 	var diff int
