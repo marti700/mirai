@@ -15,11 +15,11 @@ import (
 func AcceptableResults(expected, actual linearalgebra.Matrix, delta float64) bool {
 	for i := range expected.Data {
 		absoluteDelta := math.Abs(expected.Data[i] - actual.Data[i])
-		if (absoluteDelta <= delta) || !math.IsNaN(absoluteDelta) {
-			return true
+		if !(absoluteDelta <= delta) || math.IsNaN(absoluteDelta) {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 // Reads data from a csv file and returns the read data as a Matrix
