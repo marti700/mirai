@@ -7,7 +7,7 @@ from sklearn import tree
 from sklearn.model_selection import train_test_split
 
 # generate regression random data with 100 features
-X, y = make_classification()
+X, y = make_classification(n_informative=4, n_classes=4)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.3, random_state=42)

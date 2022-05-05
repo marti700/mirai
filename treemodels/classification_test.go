@@ -7,7 +7,7 @@ import (
 	"github.com/marti700/mirai/testutils"
 )
 
-// Test the classification accuarcy of the descicion tree modeel
+// Test the classification accuarcy of the decision tree modeel
 func TestTreeAcc(t *testing.T) {
 
 	trainData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/x_train.csv")
