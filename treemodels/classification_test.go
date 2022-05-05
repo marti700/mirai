@@ -1,50 +1,28 @@
 package treemodels
 
 import (
-	"fmt"
 	"testing"
 
+	"github.com/marti700/mirai/metrics"
 	"github.com/marti700/mirai/testutils"
-	"github.com/marti700/veritas/linearalgebra"
 )
 
-func TestGetGinis(t *testing.T) {
-	data := linearalgebra.NewMatrix([][]float64 {
-		{1,1,4},
-		{2,2,3},
-		{1,1,4},
-		{1,3,3},
-		{3,4,10},
-	})
-
-
-	fmt.Print("")
-	target := linearalgebra.NewColumnVector([]float64{1,2,1,3,4})
-
-	predicted := Predict(data, Train(data, target))
-
-	if !testutils.AcceptableResults(target, predicted, 0) {
-			t.Error("Error expected result is ", target, " but was", predicted)
-		}
-
-}
-
-func TestGetGinis1(t *testing.T) {
+// Test the classification accuarcy of the descicion tree modeel
+func TestTreeAcc(t *testing.T) {
 
 	trainData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/x_train.csv")
 	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/y_train.csv")
 
-
+	actualLabels := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/y_test.csv")
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/x_test.csv")
 	predicted := Predict(testData, Train(trainData, target))
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/predictions.csv")
 
+	myModelAcc := metrics.Acc(predicted, actualLabels )
+	skLearnModelAcc := metrics.Acc(expectedPredictions, actualLabels)
 
-	Train(trainData, target).Plot()
-
-
-	if !testutils.AcceptableResults(expectedPredictions, predicted, 0) {
-		t.Error("Error expected result is ", expectedPredictions, " but was", predicted)
+	if !testutils.IsAcceptableAccuarcyDiff(myModelAcc, skLearnModelAcc, 0.20) {
+		t.Error("Error accuarcy is not acceptable this Model accuarcy is: ", myModelAcc, "but sklearn model accuarcy is :", skLearnModelAcc)
 	}
 
 }

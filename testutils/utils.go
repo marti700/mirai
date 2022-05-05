@@ -22,6 +22,14 @@ func AcceptableResults(expected, actual linearalgebra.Matrix, delta float64) boo
 	return true
 }
 
+func IsAcceptableAccuarcyDiff(miraiModelAcc, skLearnModelAcc, diff float64) bool {
+	if miraiModelAcc > skLearnModelAcc {
+		return true
+	}
+	accDiff := skLearnModelAcc - miraiModelAcc
+	return accDiff <= diff
+}
+
 // Reads data from a csv file and returns the read data as a Matrix
 // this functiona assumes the data in the csv are numbers in the float64 range
 func ReadDataFromcsv(pathToFile string) linearalgebra.Matrix {
@@ -44,7 +52,7 @@ func ReadDataFromcsv(pathToFile string) linearalgebra.Matrix {
 	fileLines := 0
 	for scanner.Scan() {
 		// extra coma so that the last number of this line don't get mixed with the first number of the next when slitting later
-		matrixData += scanner.Text()+","
+		matrixData += scanner.Text() + ","
 		fileLines++
 	}
 
