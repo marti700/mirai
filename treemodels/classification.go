@@ -21,6 +21,7 @@ func giniImpurity(classes linearalgebra.Matrix) float64 {
 	return 1 - gini
 }
 
+// returns the index of the feature with less gini impurity (hence the bests spliting feature) and the subfeature with the less impurity
 func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 	selectedImp := 42.0
 	var bestFeatureIndex int
@@ -66,6 +67,8 @@ func min(s []float64) int {
 	return idx
 }
 
+// some times matrix with no data will be returned and matrix#GetCol will panic with index out of bound when traing to get columns of an emtpy matrix
+// this function is a wrapper arround the giniImpurity function so 0 if returned for an empty matrix
 func wrapImp(m linearalgebra.Matrix) float64 {
 	if m.Row == 0 {
 		return 0.0
@@ -73,6 +76,7 @@ func wrapImp(m linearalgebra.Matrix) float64 {
 	return giniImpurity(m.GetCol(1))
 }
 
+// returns the average of a slice of float64 numbers
 func average(data []float64) float64 {
 	var sum float64
 	for _, elm := range data {
@@ -87,6 +91,7 @@ func Train(data, target linearalgebra.Matrix) *Tree {
 	return buildTree(featureTarget)
 }
 
+// recursively trains a classification tree and returns the trained tree
 func buildTree(data linearalgebra.Matrix) *Tree {
 	if len(data.Data) == 0 {
 		return &Tree{
@@ -137,6 +142,7 @@ func Predict(data linearalgebra.Matrix, t *Tree) linearalgebra.Matrix {
 	return linearalgebra.NewColumnVector(predictions)
 }
 
+// outputs a prediction from a trained tree
 func classify(data linearalgebra.Matrix, t *Tree) float64 {
 	evFeature := t.feature
 	if t.Left == nil && t.Right == nil {
@@ -211,6 +217,10 @@ func filterRows(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) 
 	return newMatrix
 }
 
+// given a matrix and a boolean function of the type matrix -> bool returns two new matrices with the elements for what the function returns true
+// and the ones for what the function returns false.
+//
+// this function operates on the rows, so each row of the provided matrix will be passed to the boolean function
 func filterRows2(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) (linearalgebra.Matrix, linearalgebra.Matrix) {
 	var m1 linearalgebra.Matrix
 	var m2 linearalgebra.Matrix
