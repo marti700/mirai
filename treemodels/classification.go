@@ -33,13 +33,10 @@ func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 		fImpurities := make([]float64, len(midPoints))
 
 		for j := 0; j < len(midPoints); j++ {
-			less := filterRows(featureTarget, func(r linearalgebra.Matrix) bool {
+			less, greater := linearalgebra.Filter2(featureTarget, func(r linearalgebra.Matrix) bool {
 				return r.Get(0, 0) < midPoints[j]
-			})
+			}, 0)
 
-			greater := filterRows(featureTarget, func(r linearalgebra.Matrix) bool {
-				return r.Get(0, 0) > midPoints[j]
-			})
 			fImpurities[j] = (float64(less.Row)/float64(currentFeature.Row))*wrapImp(less) + (float64(greater.Row)/float64(currentFeature.Row))*wrapImp(greater)
 		}
 		currentFeatureImp := average(fImpurities)
@@ -120,10 +117,10 @@ func buildTree(data linearalgebra.Matrix) *Tree {
 	fmt.Println(bestFeature)
 
 	// left is the true branch of the tree and right the false one
-	left, right := filterRows2(data, func(r linearalgebra.Matrix) bool {
+	left, right := linearalgebra.Filter2(data, func(r linearalgebra.Matrix) bool {
 		return r.Get(0, bestFeature) <= bFeatBin
 
-	})
+	},0)
 	// 4- recursively build the tree
 	return &Tree{
 		Left:      buildTree(left),
@@ -198,43 +195,4 @@ func getValueCounts(target linearalgebra.Matrix) map[float64]int {
 // returns true if a matrix is a column vector false otherwise
 func isVector(v linearalgebra.Matrix) bool {
 	return  v.Col == 1
-}
-
-// given a matrix and a boolean function of the type matrix -> bool returns a new matrix with the elements for what the function returns true
-// this function operates on the rows, so each row of the provided matrix will be passed to the boolean function
-func filterRows(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) linearalgebra.Matrix {
-	var newMatrix linearalgebra.Matrix
-	for i := 0; i < data.Row; i++ {
-		currentRow := data.GetRow(i)
-		if f(currentRow) {
-			if len(newMatrix.Data) == 0 {
-				newMatrix = currentRow
-			} else if f(currentRow) {
-				newMatrix = linearalgebra.Insert(currentRow, newMatrix, 0)
-			}
-		}
-	}
-	return newMatrix
-}
-
-// given a matrix and a boolean function of the type matrix -> bool returns two new matrices with the elements for what the function returns true
-// and the ones for what the function returns false.
-//
-// this function operates on the rows, so each row of the provided matrix will be passed to the boolean function
-func filterRows2(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) (linearalgebra.Matrix, linearalgebra.Matrix) {
-	var m1 linearalgebra.Matrix
-	var m2 linearalgebra.Matrix
-	for i := 0; i < data.Row; i++ {
-		currentRow := data.GetRow(i)
-		if f(currentRow) && len(m1.Data) == 0 {
-			m1 = currentRow
-		} else if !f(currentRow) && len(m2.Data) == 0 {
-			m2 = currentRow
-		} else if f(currentRow) {
-			m1 = linearalgebra.Insert(currentRow, m1, 0)
-		} else {
-			m2 = linearalgebra.Insert(currentRow, m2, 0)
-		}
-	}
-	return m1, m2
 }

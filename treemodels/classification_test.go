@@ -22,7 +22,7 @@ func TestTreeAcc(t *testing.T) {
 	skLearnModelAcc := metrics.Acc(expectedPredictions, actualLabels)
 
 	if !testutils.IsAcceptableAccuarcyDiff(myModelAcc, skLearnModelAcc, 0.20) {
-		t.Error("Error accuarcy is not acceptable this Model accuarcy is: ", myModelAcc, "but sklearn model accuarcy is :", skLearnModelAcc)
+		t.Error("Error accuarcy is not acceptable. This Model accuarcy is: ", myModelAcc, "but sklearn model accuarcy is :", skLearnModelAcc)
 	}
 
 }
