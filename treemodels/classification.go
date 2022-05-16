@@ -28,7 +28,7 @@ func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 	var bestMidPoint float64
 	for i := 0; i < data.Col-1; i++ {
 		currentFeature := data.GetCol(i)
-		featureTarget := currentFeature.InsertAt(data.GetCol(data.Col-1), 1)
+		featureTarget := linearalgebra.Insert(data.GetCol(data.Col-1), currentFeature, 1)
 		midPoints := getMidPoints(currentFeature)
 		fImpurities := make([]float64, len(midPoints))
 
@@ -87,7 +87,7 @@ func average(data []float64) float64 {
 }
 
 func Train(data, target linearalgebra.Matrix) *Tree {
-	featureTarget := data.InsertAt(target, data.Col)
+	featureTarget := linearalgebra.Insert(target, data, data.Col)
 	return buildTree(featureTarget)
 }
 
@@ -210,7 +210,7 @@ func filterRows(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool) 
 			if len(newMatrix.Data) == 0 {
 				newMatrix = currentRow
 			} else if f(currentRow) {
-				newMatrix = newMatrix.InsertAt(currentRow, 0)
+				newMatrix = linearalgebra.Insert(currentRow, newMatrix, 0)
 			}
 		}
 	}
@@ -231,9 +231,9 @@ func filterRows2(data linearalgebra.Matrix, f func(r linearalgebra.Matrix) bool)
 		} else if !f(currentRow) && len(m2.Data) == 0 {
 			m2 = currentRow
 		} else if f(currentRow) {
-			m1 = m1.InsertAt(currentRow, 0)
+			m1 = linearalgebra.Insert(currentRow, m1, 0)
 		} else {
-			m2 = m2.InsertAt(currentRow, 0)
+			m2 = linearalgebra.Insert(currentRow, m2, 0)
 		}
 	}
 	return m1, m2

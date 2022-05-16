@@ -62,7 +62,7 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 			panic("Learning rate is 0")
 		}
 
-		data = data.InsertAt(linearalgebra.Ones(data.Row, 1), 0)
+		data = linearalgebra.Insert(linearalgebra.Ones(data.Row, 1), data, 0)
 		gradient := func(tv linearalgebra.Matrix, f linearalgebra.Matrix, slopes linearalgebra.Matrix) linearalgebra.Matrix {
 			lossFunctionVals := make([]float64, f.Col)
 
@@ -77,13 +77,13 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 		estimatedHyperParameters := estimators.GradiantDescent(learningRate, &data, &target, gradient)
 		m.Hyperparameters = *estimatedHyperParameters
 	} else if opt.Estimator.GetType() == "ols" {
-		data = data.InsertAt(linearalgebra.Ones(data.Row, 1), 0)
+		data = linearalgebra.Insert(linearalgebra.Ones(data.Row, 1), data, 0)
 		m.Hyperparameters = estimators.OLS(data, target)
 	}
 }
 
 //gives predictions based on the hyperparameters estimations obtained by Train()
 func (m LinearRegression) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
-	data = data.InsertAt(linearalgebra.Ones(data.Row, 1), 0) //to take into considaration the bias term
+	data = linearalgebra.Insert(linearalgebra.Ones(data.Row, 1), data, 0) //to take into considaration the bias term
 	return data.Mult(m.Hyperparameters)
 }
