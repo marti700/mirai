@@ -37,3 +37,14 @@ if expected2 != acc2 {
 	}
 
 }
+
+func TestRSS(t *testing.T) {
+	v := linearalgebra.NewColumnVector([]float64{1,2,3,4,5,6,7,8,9,10})
+
+	expected := 82.5
+	result := RSS(v)
+
+	if result != expected {
+		t.Error("Expected result is: ",expected, "but actual was :", result )
+	}
+}
