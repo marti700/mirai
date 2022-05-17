@@ -2,7 +2,6 @@ package treemodels
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/marti700/veritas/linearalgebra"
 )
@@ -151,29 +150,10 @@ func classify(data linearalgebra.Matrix, t *Tree) float64 {
 	return classify(data, t.Right)
 }
 
-// returns a slice of the midpoints between the sorted element of a vector
-// data: is the vector to be proccessed. It must be a column vector
-func getMidPoints(data linearalgebra.Matrix) []float64 {
-	sort.Float64s(data.Data)
-	r := append(data.Data, data.Data[len(data.Data)-1]+1) //adds extra element to obtain a midpoint above the last number
-	midPoints := make([]float64, 0, len(r))
-
-	i := 0
-	j := 1
-
-	for j < len(r) {
-		midPoints = append(midPoints, (r[i]+r[j])/2.0)
-		i++
-		j++
-	}
-
-	return midPoints
-}
-
 // recieves a column vector as input and returns a map wich keys are the values of the vector
 // and its values the number of times the key appears in the vector
 func getValueCounts(target linearalgebra.Matrix) map[float64]int {
-	if !isVector(target) {
+	if !linearalgebra.IsColumnVector(target) {
 		panic("target must be a column Vector")
 	}
 
@@ -190,9 +170,4 @@ func getValueCounts(target linearalgebra.Matrix) map[float64]int {
 
 	}
 	return values
-}
-
-// returns true if a matrix is a column vector false otherwise
-func isVector(v linearalgebra.Matrix) bool {
-	return  v.Col == 1
 }
