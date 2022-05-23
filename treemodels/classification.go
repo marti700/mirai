@@ -20,7 +20,7 @@ func giniImpurity(classes linearalgebra.Matrix) float64 {
 	return 1 - gini
 }
 
-// returns the index of the feature with less gini impurity (hence the bests spliting feature) and the subfeature with the less impurity
+// returns the index of the feature with less gini impurity (hence the best spliting feature) and the subfeature with the less impurity
 func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 	selectedImp := 42.0
 	var bestFeatureIndex int
@@ -70,16 +70,6 @@ func wrapImp(m linearalgebra.Matrix) float64 {
 		return 0.0
 	}
 	return giniImpurity(m.GetCol(1))
-}
-
-// returns the average of a slice of float64 numbers
-func average(data []float64) float64 {
-	var sum float64
-	for _, elm := range data {
-		sum += elm
-	}
-
-	return sum / float64(len(data))
 }
 
 func Train(data, target linearalgebra.Matrix) *Tree {

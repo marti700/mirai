@@ -28,3 +28,13 @@ func getMidPoints(data linearalgebra.Matrix) []float64 {
 
 	return midPoints
 }
+
+// returns the average of a slice of float64 numbers
+func average(data []float64) float64 {
+	var sum float64
+	for _, elm := range data {
+		sum += elm
+	}
+
+	return sum / float64(len(data))
+}
