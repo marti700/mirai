@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/marti700/veritas/linearalgebra"
+	"github.com/marti700/veritas/stats"
 )
 
 // calculates the gini impurity of a feature
@@ -38,7 +39,7 @@ func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 
 			fImpurities[j] = (float64(less.Row)/float64(currentFeature.Row))*wrapImp(less) + (float64(greater.Row)/float64(currentFeature.Row))*wrapImp(greater)
 		}
-		currentFeatureImp := average(fImpurities)
+		currentFeatureImp := stats.Mean(fImpurities)
 
 		if selectedImp > currentFeatureImp {
 			bestFeatureIndex = i
