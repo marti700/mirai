@@ -30,22 +30,7 @@ func Acc(predicted, actual linearalgebra.Matrix) float64 {
 }
 
 // Cualculates the residual squared error of a vector
-func RSS(v linearalgebra.Matrix) float64 {
-	avr := average(v.Data);
-	var sum float64;
-
-	for _, e := range v.Data {
-		sum += (e - avr) * (e - avr)
-	}
-	return sum
-}
-
-// returns the average of a slice of float64 numbers
-func average(data []float64) float64 {
-	var sum float64
-	for _, elm := range data {
-		sum += elm
-	}
-
-	return sum / float64(len(data))
+func RSS(actual, predicted linearalgebra.Matrix) float64 {
+	squareF := func(x float64) float64 { return x * x }
+	return linearalgebra.ElementsSum(actual.Substract(predicted).Map(squareF))
 }

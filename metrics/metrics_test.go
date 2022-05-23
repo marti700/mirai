@@ -39,10 +39,11 @@ if expected2 != acc2 {
 }
 
 func TestRSS(t *testing.T) {
-	v := linearalgebra.NewColumnVector([]float64{1,2,3,4,5,6,7,8,9,10})
+	predicted := linearalgebra.NewColumnVector([]float64{1,2,3,4,5,6,7,8,9,10})
+	actual := linearalgebra.NewColumnVector([]float64{10,20,30,40,50,60,70,80,90,100})
 
-	expected := 82.5
-	result := RSS(v)
+	expected := 31185.0
+	result := RSS(actual, predicted)
 
 	if result != expected {
 		t.Error("Expected result is: ",expected, "but actual was :", result )
