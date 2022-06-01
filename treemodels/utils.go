@@ -1,6 +1,7 @@
 package treemodels
 
 import (
+	"math"
 	"sort"
 
 	"github.com/marti700/veritas/linearalgebra"
@@ -27,4 +28,18 @@ func getMidPoints(data linearalgebra.Matrix) []float64 {
 	}
 
 	return midPoints
+}
+
+
+// returns the index of the lowest value of this slice
+func min(s []float64) int {
+	min := math.Inf(1)
+	var idx int
+	for i, val := range s {
+		if min > val {
+			min = val
+			idx = i
+		}
+	}
+	return idx
 }

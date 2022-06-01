@@ -51,20 +51,7 @@ func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 	return bestFeatureIndex, bestMidPoint
 }
 
-// returns the index of the lowest value of this slice
-func min(s []float64) int {
-	min := 42.0
-	var idx int
-	for i, val := range s {
-		if min > val {
-			min = val
-			idx = i
-		}
-	}
-	return idx
-}
-
-// some times matrix with no data will be returned and matrix#GetCol will panic with index out of bound when traing to get columns of an emtpy matrix
+// some times matrix with no data will be returned and matrix#GetCol will panic with index out of bound when trying to get columns of an emtpy matrix
 // this function is a wrapper arround the giniImpurity function so 0 if returned for an empty matrix
 func wrapImp(m linearalgebra.Matrix) float64 {
 	if m.Row == 0 {
