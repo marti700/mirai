@@ -1,6 +1,7 @@
 package treemodels
 
 import (
+	// "fmt"
 	"math"
 
 	"github.com/marti700/mirai/metrics"
@@ -56,45 +57,58 @@ func genOneValueVector(val float64, len int) linearalgebra.Matrix {
 // 	return minValIdx, featsRSS[minValIdx]
 // }
 
-func BuildTree1(data, target linearalgebra.Matrix) Tree {
-	if target.Row < 21 {
-		return Tree{
+func train1(data, target linearalgebra.Matrix) *Tree {
+	dataTarget := linearalgebra.Insert(target, data, data.Col+1)
+	return buildTree1(dataTarget)
+
+}
+
+func buildTree1(data linearalgebra.Matrix) *Tree {
+	target := data.GetCol(data.Col - 1)
+	if target.Row < 20 {
+		return &Tree{
 			Left:    nil,
 			Right:   nil,
 			Predict: stats.Mean(target.Data),
 		}
 	}
 
-
-	featsRSS := make([]float64, data.Col)
-	midPoint := math.Inf(1)
+	featsRSS := make([]float64, data.Col-1)
+	featMidpoint := make([]float64, data.Col-1)
+	var midPoint float64
 	// for each feature
-	for i := 0; i < data.Col; i++ {
+	for i := 0; i < data.Col-1; i++ {
 		feat := data.GetCol(i)
-		dataTarget := linearalgebra.Insert(target, feat, 2)
+		// dataTarget := linearalgebra.Insert(target, feat, 2)
 		midPoints := getMidPoints(feat)
+		midPoint = math.Inf(1)
+		mRSS := make([]float64, len(midPoints))
 		// uu := make([]float64, len(midPoints))
 		minRSS := math.Inf(1)
 		// calculate the min RSS
 		for j := 0; j < len(midPoints)-1; j++ {
-			less, greater := linearalgebra.Filter2(dataTarget, func(r linearalgebra.Matrix) bool {
-				return r.Get(0,0) < midPoints[j]
+			less, greater := linearalgebra.Filter2(data, func(r linearalgebra.Matrix) bool {
+				return r.Get(0, i) < midPoints[j]
 			}, 0)
-			// less, greater := linearalgebra.ElementWiseFilter2(feat, func(r float64) bool {
-			// 	return r < midPoints[j]
-			// }, 1)
+
+			var lessRSS float64
+			var greaterRSS float64
 
 			lessMean := genOneValueVector(
-				stats.Mean(less.GetCol(1).Data),
+				stats.Mean(less.GetCol(i).Data),
 				less.Row,
 			)
 
+			lessRSS = metrics.RSS(less.GetCol(data.Col-1), lessMean)
+
 			greaterMean := genOneValueVector(
-				stats.Mean(greater.GetCol(1).Data),
+				stats.Mean(greater.GetCol(i).Data),
 				greater.Row,
 			)
+			greaterRSS = metrics.RSS(greater.GetCol(data.Col-1), greaterMean)
 
-			currentRSS := metrics.RSS(less.GetCol(1), lessMean) + metrics.RSS(greater.GetCol(1), greaterMean)
+			currentRSS := lessRSS + greaterRSS
+			mRSS[j] = currentRSS
 			// uu[j] = currentRSS
 			if minRSS > currentRSS {
 				minRSS = currentRSS
@@ -103,19 +117,34 @@ func BuildTree1(data, target linearalgebra.Matrix) Tree {
 		}
 		// uu = make([]float64, len(midPoints))
 		featsRSS[i] = minRSS
+		featMidpoint[i] = midPoint
+		// featsRSS[i] = stats.Mean(mRSS)
+
 	}
 
 	minValIdx := min(featsRSS) // the index of the minimun value
+	optimalMidpoint := featMidpoint[minValIdx]
 	stats.Min(featsRSS)
-	tmpDat := linearalgebra.Insert(target, data, data.Col+1)
+	// s,g := linearalgebra.Filter2(data, func(r linearalgebra.Matrix) bool {
+	// 	return r.Get(0,6) < -0.592},0)
+	// fmt.Println(s)
+	// fmt.Println(g)
 	left, right := linearalgebra.Filter2(data, func(r linearalgebra.Matrix) bool {
-		return tmpDat.Get(0, minValIdx) < featsRSS[minValIdx]
+		return r.Get(0, minValIdx) < optimalMidpoint
 	}, 0)
 
-	return Tree{
-		Left:      buildTree(left),
-		Right:     buildTree(right),
+	return &Tree{
+		Left:      buildTree1(left),
+		Right:     buildTree1(right),
 		feature:   minValIdx,
-		Condition: midPoint,
+		Condition: optimalMidpoint,
 	}
+}
+
+func Predict1(data linearalgebra.Matrix, t *Tree) linearalgebra.Matrix {
+	predictions := make([]float64, data.Row)
+	for i := 0; i < data.Row; i++ {
+		predictions[i] = classify(data.GetRow(i), t)
+	}
+	return linearalgebra.NewColumnVector(predictions)
 }

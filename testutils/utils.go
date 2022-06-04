@@ -23,7 +23,7 @@ func AcceptableResults(expected, actual linearalgebra.Matrix, delta float64) boo
 }
 
 func IsAcceptableAccuarcyDiff(miraiModelAcc, skLearnModelAcc, diff float64) bool {
-	if miraiModelAcc > skLearnModelAcc {
+	if miraiModelAcc <= skLearnModelAcc {
 		return true
 	}
 	accDiff := skLearnModelAcc - miraiModelAcc
