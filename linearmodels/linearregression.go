@@ -21,7 +21,7 @@ func init() {
 }
 
 // Returns an element-wise indication of the sign of a number.
-// returns 0 if the number is negative 0 if the number is 0 and 1 if the number is positive
+// returns -1 if the number is negative 0 if the number is 0 and 1 if the number is positive
 func sign(x float64) float64 {
 	if x < 0 {
 		return -1

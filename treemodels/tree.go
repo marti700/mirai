@@ -18,14 +18,6 @@ type Tree struct {
 	Predict   float64
 }
 
-func (t *Tree) Insert(direction string, tree *Tree) {
-	if direction == "LEFT" {
-		t.Left = tree
-	} else {
-		t.Right = tree
-	}
-}
-
 func (t *Tree) Plot() {
 	dotStr := `digraph Tree {
 		node [shape=box, style="filled, rounded", fontname=helvetica] ;
