@@ -51,7 +51,7 @@ func generateDotFile(parent *Tree, str string, node int) string {
 	parentNodeID := 0
 	nodeID := 0
 	// Root node
-	cond := strconv.FormatFloat(parent.Condition, 'E', -1, 64)
+	cond := strconv.FormatFloat(parent.Condition, 'f', -1, 64)
 	nod := strconv.Itoa(parentNodeID)
 	str = str + nod + fmt.Sprintf(`[label="X[%d] <= %s "] ;
 	`, parent.feature, cond)
