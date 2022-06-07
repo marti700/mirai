@@ -15,7 +15,9 @@ func TestTreeAcc(t *testing.T) {
 
 	actualLabels := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/y_test.csv")
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/x_test.csv")
-	predicted := Predict(testData, Train(trainData, target))
+	model := NewDecicionTreeeClassifier()
+	model.Train(trainData, target)
+	predicted := model.Predict(testData)
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/predictions.csv")
 
 	myModelAcc := metrics.Acc(predicted, actualLabels )

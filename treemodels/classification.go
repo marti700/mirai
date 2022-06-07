@@ -7,6 +7,15 @@ import (
 	"github.com/marti700/veritas/stats"
 )
 
+
+type DecisionTreeClassifier struct {
+	Model *Tree
+}
+
+func NewDecicionTreeeClassifier() DecisionTreeClassifier {
+	return DecisionTreeClassifier {}
+}
+
 // calculates the gini impurity of a feature
 // this function recieves the classification classes as a column vector
 func giniImpurity(classes linearalgebra.Matrix) float64 {
@@ -60,13 +69,13 @@ func wrapImp(m linearalgebra.Matrix) float64 {
 	return giniImpurity(m.GetCol(1))
 }
 
-func Train(data, target linearalgebra.Matrix) *Tree {
+func (t *DecisionTreeClassifier) Train(data, target linearalgebra.Matrix) {
 	featureTarget := linearalgebra.Insert(target, data, data.Col)
-	return buildTree(featureTarget)
+	t.Model = buildClassificationTree(featureTarget)
 }
 
 // recursively trains a classification tree and returns the trained tree
-func buildTree(data linearalgebra.Matrix) *Tree {
+func buildClassificationTree(data linearalgebra.Matrix) *Tree {
 	if len(data.Data) == 0 {
 		return &Tree{
 			Left:      nil,
@@ -89,7 +98,7 @@ func buildTree(data linearalgebra.Matrix) *Tree {
 		}
 	}
 
-	// 1- Find best feature split
+	// Find best feature split
 	bestFeature, bFeatBin := selectBestSplit(data)
 	fmt.Println(bestFeature)
 
@@ -98,20 +107,23 @@ func buildTree(data linearalgebra.Matrix) *Tree {
 		return r.Get(0, bestFeature) <= bFeatBin
 
 	},0)
-	// 4- recursively build the tree
+	// recursively build the tree
 	return &Tree{
-		Left:      buildTree(left),
-		Right:     buildTree(right),
+		Left:      buildClassificationTree(left),
+		Right:     buildClassificationTree(right),
 		feature:   bestFeature,
 		Condition: bFeatBin,
 		Data:      data,
 	}
 }
 
-func Predict(data linearalgebra.Matrix, t *Tree) linearalgebra.Matrix {
+// make classification predictions based on data
+// the data argument is a Matrix similar to the one used for training
+// Returns a Matrix containing predictions for the provided data
+func (t *DecisionTreeClassifier) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	predictions := make([]float64, data.Row)
 	for i := 0; i < data.Row; i++ {
-		predictions[i] = classify(data.GetRow(i), t)
+		predictions[i] = classify(data.GetRow(i), t.Model)
 	}
 	return linearalgebra.NewColumnVector(predictions)
 }
