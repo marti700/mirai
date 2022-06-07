@@ -16,6 +16,28 @@ func NewDecicionTreeeClassifier() DecisionTreeClassifier {
 	return DecisionTreeClassifier {}
 }
 
+// recieves a column vector as input and returns a map wich keys are the values of the vector
+// and its values the number of times the key appears in the vector
+func getValueCounts(target linearalgebra.Matrix) map[float64]int {
+	if !linearalgebra.IsColumnVector(target) {
+		panic("target must be a column Vector")
+	}
+
+	values := make(map[float64]int)
+
+	for i := 0; i < target.Row; i++ {
+		currentVal := target.Get(i, 0)
+		_, present := values[currentVal]
+		if !present {
+			values[currentVal] = 1
+			continue
+		}
+		values[currentVal]++
+
+	}
+	return values
+}
+
 // calculates the gini impurity of a feature
 // this function recieves the classification classes as a column vector
 func giniImpurity(classes linearalgebra.Matrix) float64 {
@@ -121,43 +143,5 @@ func buildClassificationTree(data linearalgebra.Matrix) *Tree {
 // the data argument is a Matrix similar to the one used for training
 // Returns a Matrix containing predictions for the provided data
 func (t *DecisionTreeClassifier) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
-	predictions := make([]float64, data.Row)
-	for i := 0; i < data.Row; i++ {
-		predictions[i] = classify(data.GetRow(i), t.Model)
-	}
-	return linearalgebra.NewColumnVector(predictions)
-}
-
-// outputs a prediction from a trained tree
-func classify(data linearalgebra.Matrix, t *Tree) float64 {
-	evFeature := t.feature
-	if t.Left == nil && t.Right == nil {
-		return t.Predict
-	}
-	if data.Get(0, evFeature) <= t.Condition {
-		return classify(data, t.Left)
-	}
-	return classify(data, t.Right)
-}
-
-// recieves a column vector as input and returns a map wich keys are the values of the vector
-// and its values the number of times the key appears in the vector
-func getValueCounts(target linearalgebra.Matrix) map[float64]int {
-	if !linearalgebra.IsColumnVector(target) {
-		panic("target must be a column Vector")
-	}
-
-	values := make(map[float64]int)
-
-	for i := 0; i < target.Row; i++ {
-		currentVal := target.Get(i, 0)
-		_, present := values[currentVal]
-		if !present {
-			values[currentVal] = 1
-			continue
-		}
-		values[currentVal]++
-
-	}
-	return values
+	return genPredictions(data, t.Model)
 }

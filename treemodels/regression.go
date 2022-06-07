@@ -110,9 +110,5 @@ func buildRegressionTree(data linearalgebra.Matrix) *Tree {
 // the data argument is a Matrix with similar to the one used for training
 // Returns a Matrix containing the predictions for the provided data
 func (t *DecisionTreeRegressor) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
-	predictions := make([]float64, data.Row)
-	for i := 0; i < data.Row; i++ {
-		predictions[i] = classify(data.GetRow(i), t.Model)
-	}
-	return linearalgebra.NewColumnVector(predictions)
+	return genPredictions(data, t.Model)
 }
