@@ -107,7 +107,7 @@ func buildRegressionTree(data linearalgebra.Matrix) *Tree {
 }
 
 // make predictions based on data
-// the data argument is a Matrix with data similar to the one used for training
+// the data argument is a Matrix with similar to the one used for training
 // Returns a Matrix containing the predictions for the provided data
 func (t *DecisionTreeRegressor) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	predictions := make([]float64, data.Row)
