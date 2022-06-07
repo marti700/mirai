@@ -8,6 +8,14 @@ import (
 	"github.com/marti700/veritas/stats"
 )
 
+type DecisionTreeRegressor struct {
+	Model *Tree
+}
+
+func NewDecisionTreeRegressor() DecisionTreeRegressor {
+	return DecisionTreeRegressor {}
+}
+
 
 // generates a column vector of length len and which only value will be val
 func genOneValueVector(val float64, len int) linearalgebra.Matrix {
@@ -18,13 +26,14 @@ func genOneValueVector(val float64, len int) linearalgebra.Matrix {
 	return linearalgebra.NewColumnVector(vec)
 }
 
-func train1(data, target linearalgebra.Matrix) *Tree {
+func (t *DecisionTreeRegressor) Train(data, target linearalgebra.Matrix) {
 	dataTarget := linearalgebra.Insert(target, data, data.Col+1)
-	return buildTree1(dataTarget)
+	tree := buildRegressionTree(dataTarget)
+	t.Model = tree
 
 }
 
-func buildTree1(data linearalgebra.Matrix) *Tree {
+func buildRegressionTree(data linearalgebra.Matrix) *Tree {
 	target := data.GetCol(data.Col - 1)
 	if target.Row < 20 {
 		return &Tree{
@@ -43,8 +52,8 @@ func buildTree1(data linearalgebra.Matrix) *Tree {
 		midPoints := getMidPoints(feat)
 		midPoint = math.Inf(1)
 		mRSS := make([]float64, len(midPoints))
-		// uu := make([]float64, len(midPoints))
 		minRSS := math.Inf(1)
+		// find the optimal split value
 		for j := 0; j < len(midPoints)-1; j++ {
 			less, greater := linearalgebra.Filter2(data, func(r linearalgebra.Matrix) bool {
 				return r.Get(0, i) < midPoints[j]
@@ -80,23 +89,22 @@ func buildTree1(data linearalgebra.Matrix) *Tree {
 
 	minValIdx := min(featsRSS) // the index of the minimun value
 	optimalMidpoint := featMidpoint[minValIdx]
-	stats.Min(featsRSS)
 	left, right := linearalgebra.Filter2(data, func(r linearalgebra.Matrix) bool {
 		return r.Get(0, minValIdx) < optimalMidpoint
 	}, 0)
 
 	return &Tree{
-		Left:      buildTree1(left),
-		Right:     buildTree1(right),
+		Left:      buildRegressionTree(left),
+		Right:     buildRegressionTree(right),
 		feature:   minValIdx,
 		Condition: optimalMidpoint,
 	}
 }
 
-func Predict1(data linearalgebra.Matrix, t *Tree) linearalgebra.Matrix {
+func (t *DecisionTreeRegressor) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	predictions := make([]float64, data.Row)
 	for i := 0; i < data.Row; i++ {
-		predictions[i] = classify(data.GetRow(i), t)
+		predictions[i] = classify(data.GetRow(i), t.Model)
 	}
 	return linearalgebra.NewColumnVector(predictions)
 }
