@@ -26,6 +26,8 @@ func genOneValueVector(val float64, len int) linearalgebra.Matrix {
 	return linearalgebra.NewColumnVector(vec)
 }
 
+// Trains the decision tree regressor based on the data and the target using
+// the CART algorithm
 func (t *DecisionTreeRegressor) Train(data, target linearalgebra.Matrix) {
 	dataTarget := linearalgebra.Insert(target, data, data.Col+1)
 	tree := buildRegressionTree(dataTarget)
@@ -33,8 +35,11 @@ func (t *DecisionTreeRegressor) Train(data, target linearalgebra.Matrix) {
 
 }
 
+// Recursively builds thee decision tree model based on the data
 func buildRegressionTree(data linearalgebra.Matrix) *Tree {
 	target := data.GetCol(data.Col - 1)
+	// if the number of elements in data is less that 20 make a prediction
+	// one can go all the way down to 2 or maybe one but this will cause overfit
 	if target.Row < 20 {
 		return &Tree{
 			Left:    nil,
@@ -101,6 +106,9 @@ func buildRegressionTree(data linearalgebra.Matrix) *Tree {
 	}
 }
 
+// make predictions based on data
+// the data argument is a Matrix with data similar to the one used for training
+// Returns a Matrix containing the predictions for the provided data
 func (t *DecisionTreeRegressor) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	predictions := make([]float64, data.Row)
 	for i := 0; i < data.Row; i++ {
