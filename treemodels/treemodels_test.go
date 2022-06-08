@@ -36,7 +36,8 @@ func TestRegressionTree(t *testing.T) {
 
 	actualLabels := testutils.ReadDataFromcsv("../testdata/datagenerators/data/rdecisiontree/data/y_test.csv")
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/rdecisiontree/data/x_test.csv")
-	model := NewDecisionTreeRegressor()
+	regressorOptions := options.NewDTRegressorOptions(20, metrics.RSS)
+	model := NewDecisionTreeRegressor(regressorOptions)
 	model.Train(trainData, target)
 	predicted := model.Predict(testData)
 	// predicted.Plot()

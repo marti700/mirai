@@ -3,17 +3,20 @@ package treemodels
 import (
 	"math"
 
-	"github.com/marti700/mirai/metrics"
+	"github.com/marti700/mirai/options"
 	"github.com/marti700/veritas/linearalgebra"
 	"github.com/marti700/veritas/stats"
 )
 
 type DecisionTreeRegressor struct {
 	Model *Tree
+	Opts options.DTreeRegreessorOptions
 }
 
-func NewDecisionTreeRegressor() DecisionTreeRegressor {
-	return DecisionTreeRegressor {}
+func NewDecisionTreeRegressor(opt options.DTreeRegreessorOptions) DecisionTreeRegressor {
+	return DecisionTreeRegressor {
+		Opts: opt,
+	}
 }
 
 
@@ -30,17 +33,17 @@ func genOneValueVector(val float64, len int) linearalgebra.Matrix {
 // the CART algorithm
 func (t *DecisionTreeRegressor) Train(data, target linearalgebra.Matrix) {
 	dataTarget := linearalgebra.Insert(target, data, data.Col+1)
-	tree := buildRegressionTree(dataTarget)
+	tree := buildRegressionTree(dataTarget, t.Opts)
 	t.Model = tree
 
 }
 
 // Recursively builds thee decision tree model based on the data
-func buildRegressionTree(data linearalgebra.Matrix) *Tree {
+func buildRegressionTree(data linearalgebra.Matrix, opts options.DTreeRegreessorOptions) *Tree {
 	target := data.GetCol(data.Col - 1)
 	// if the number of elements in data is less that 20 make a prediction
 	// one can go all the way down to 2 or maybe one but this will cause overfit
-	if target.Row < 20 {
+	if target.Row < opts.MinLeafSamples  {
 		return &Tree{
 			Left:    nil,
 			Right:   nil,
@@ -72,13 +75,13 @@ func buildRegressionTree(data linearalgebra.Matrix) *Tree {
 				less.Row,
 			)
 
-			lessRSS = metrics.RSS(less.GetCol(data.Col-1), lessMean)
+			lessRSS = opts.Criterion(less.GetCol(data.Col-1), lessMean)
 
 			greaterMean := genOneValueVector(
 				stats.Mean(greater.GetCol(i).Data),
 				greater.Row,
 			)
-			greaterRSS = metrics.RSS(greater.GetCol(data.Col-1), greaterMean)
+			greaterRSS = opts.Criterion(greater.GetCol(data.Col-1), greaterMean)
 
 			currentRSS := lessRSS + greaterRSS
 			mRSS[j] = currentRSS
@@ -99,8 +102,8 @@ func buildRegressionTree(data linearalgebra.Matrix) *Tree {
 	}, 0)
 
 	return &Tree{
-		Left:      buildRegressionTree(left),
-		Right:     buildRegressionTree(right),
+		Left:      buildRegressionTree(left, opts),
+		Right:     buildRegressionTree(right, opts),
 		feature:   minValIdx,
 		Condition: optimalMidpoint,
 	}
