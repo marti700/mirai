@@ -3,7 +3,7 @@
 
 package options
 
-// represents the options for the Ordinari least square estimator
+// represents the options for the Ordinary least square estimator
 type OLSOptions struct {
 	estimator string
 }

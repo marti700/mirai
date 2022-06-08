@@ -1,5 +1,5 @@
-// this files defines a struct that defines some possible configurations 
-// for the linear regression model
+// this files defines a struct with some possible configurations options
+// for the gradient descent estimator
 
 package options
 
