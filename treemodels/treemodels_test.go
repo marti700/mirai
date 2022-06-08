@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/marti700/mirai/metrics"
+	"github.com/marti700/mirai/options"
 	"github.com/marti700/mirai/testutils"
 )
 
@@ -15,7 +16,7 @@ func TestTreeAcc(t *testing.T) {
 
 	actualLabels := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/y_test.csv")
 	testData := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/x_test.csv")
-	model := NewDecicionTreeeClassifier()
+	model := NewDecicionTreeeClassifier(options.NewDTreeClassifierOption("GINI"))
 	model.Train(trainData, target)
 	predicted := model.Predict(testData)
 	expectedPredictions := testutils.ReadDataFromcsv("../testdata/datagenerators/data/cdecisiontree/data/predictions.csv")

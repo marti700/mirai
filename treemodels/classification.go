@@ -3,6 +3,7 @@ package treemodels
 import (
 	"fmt"
 
+	"github.com/marti700/mirai/options"
 	"github.com/marti700/veritas/linearalgebra"
 	"github.com/marti700/veritas/stats"
 )
@@ -10,10 +11,13 @@ import (
 
 type DecisionTreeClassifier struct {
 	Model *Tree
+	Opts options.Option
 }
 
-func NewDecicionTreeeClassifier() DecisionTreeClassifier {
-	return DecisionTreeClassifier {}
+func NewDecicionTreeeClassifier(opt options.Option) DecisionTreeClassifier {
+	return DecisionTreeClassifier {
+		Opts: opt,
+	}
 }
 
 // recieves a column vector as input and returns a map wich keys are the values of the vector
