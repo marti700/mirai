@@ -39,24 +39,25 @@ func regularizator(param float64, opt options.RegOptions) float64 {
 // general Linear model linear model struct type
 type LinearRegression struct {
 	Hyperparameters linearalgebra.Matrix
+	Opts options.LROptions
 }
 
 // trains a linear model
 // the target parameter is the variable to be predicted
 // the data parameter is the data observations represented as a matrix
-// this function will set the hyperparameter directly in the reciver and will panic if
+// this function will set the hyperparameters directly in the reciver and will panic if
 // LROptions.Estimator = "gd" and LROptinos.LearningRate = 0
 func (m *LinearRegression) Train(target linearalgebra.Matrix,
-	data linearalgebra.Matrix,
-	opt options.LROptions) {
+	data linearalgebra.Matrix) {
 
-	if opt.Estimator.GetType() == "gd" {
-		learningRate := opt.Estimator.(options.GDOptions).LearningRate
+	if m.Opts.Estimator.GetType() == "gd" {
+		learningRate := m.Opts.Estimator.(options.GDOptions).LearningRate
 		if learningRate == 0.0 {
 			panic("Learning rate is 0")
 		}
 
 		data = linearalgebra.Insert(linearalgebra.Ones(data.Row, 1), data, 0)
+		// the gradient function
 		gradient := func(tv linearalgebra.Matrix, f linearalgebra.Matrix, slopes linearalgebra.Matrix) linearalgebra.Matrix {
 			lossFunctionVals := make([]float64, f.Col)
 
@@ -64,13 +65,14 @@ func (m *LinearRegression) Train(target linearalgebra.Matrix,
 			currentModelResults := f.Mult(slopes)
 			for j := 0; j < f.Col; j++ {
 				predErr := tv.Substract(currentModelResults)
-				lossFunctionVals[j] = linearalgebra.ElementsSum(f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr)) + regularizator(slopes.Get(j, 0), opt.Regularization)
+				lossFunctionVals[j] = linearalgebra.ElementsSum(f.GetCol(j).ScaleBy(-2).HadamardProduct(predErr)) + regularizator(slopes.Get(j, 0), m.Opts.Regularization)
 			}
 			return linearalgebra.NewColumnVector(lossFunctionVals)
 		}
+
 		estimatedHyperParameters := estimators.GradiantDescent(learningRate, &data, &target, gradient)
 		m.Hyperparameters = *estimatedHyperParameters
-	} else if opt.Estimator.GetType() == "ols" {
+	} else if m.Opts.Estimator.GetType() == "ols" {
 		data = linearalgebra.Insert(linearalgebra.Ones(data.Row, 1), data, 0)
 		m.Hyperparameters = estimators.OLS(data, target)
 	}

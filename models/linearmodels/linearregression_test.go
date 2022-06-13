@@ -8,19 +8,16 @@ import (
 	"github.com/marti700/mirai/testutils"
 )
 
-
 func TestLinearRegressionTrainGD(t *testing.T) {
 	trainData := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/x_train.csv")
 	target := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/y_train.csv")
-
-	lr := &linearmodels.LinearRegression{}
 
 	options := options.LROptions{
 		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
 	}
 
-
-	lr.Train(target, trainData, options)
+	lr := &linearmodels.LinearRegression{Opts: options}
+	lr.Train(target, trainData)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/hyperparameters.csv")
@@ -43,13 +40,12 @@ func TestLinearRegressionTrainOLS(t *testing.T) {
 	trainData := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/x_train.csv")
 	target := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/y_train.csv")
 
-	lr := &linearmodels.LinearRegression{}
-
 	options := options.LROptions{
 		Estimator: options.NewOLSOptions(),
 	}
 
-	lr.Train(target, trainData, options)
+	lr := &linearmodels.LinearRegression{Opts: options}
+	lr.Train(target, trainData)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/hyperparameters.csv")
@@ -73,14 +69,13 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 	trainData := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/ridgeregression/data/x_train.csv")
 	target := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/ridgeregression/data/y_train.csv")
 
-	lm := &linearmodels.LinearRegression{}
-
 	options := options.LROptions{
 		Estimator:      options.NewGDOptions(1000, 0.001, 0.00003),
 		Regularization: options.NewRegOptions("l2", 1.0),
 	}
 
-	lm.Train(target, trainData, options)
+	lm := &linearmodels.LinearRegression{Opts: options}
+	lm.Train(target, trainData)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/ridgeregression/data/hyperparameters.csv")
@@ -103,14 +98,14 @@ func TestLassoRegressionTrainGD(t *testing.T) {
 	trainData := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/lassoregression/data/x_train.csv")
 	target := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/lassoregression/data/y_train.csv")
 
-	lm := &linearmodels.LinearRegression{}
 
 	options := options.LROptions{
 		Estimator:      options.NewGDOptions(1000, 0.001, 0.00003),
 		Regularization: options.NewRegOptions("l1", 1.0),
 	}
 
-	lm.Train(target, trainData, options)
+	lm := &linearmodels.LinearRegression{Opts: options}
+	lm.Train(target, trainData)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/lassoregression/data/hyperparameters.csv")
