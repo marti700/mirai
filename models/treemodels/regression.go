@@ -13,8 +13,8 @@ type DecisionTreeRegressor struct {
 	Opts options.DTreeRegreessorOptions
 }
 
-func NewDecisionTreeRegressor(opt options.DTreeRegreessorOptions) DecisionTreeRegressor {
-	return DecisionTreeRegressor {
+func NewDecisionTreeRegressor(opt options.DTreeRegreessorOptions) *DecisionTreeRegressor {
+	return &DecisionTreeRegressor {
 		Opts: opt,
 	}
 }

@@ -14,8 +14,8 @@ type DecisionTreeClassifier struct {
 	Opts options.Option
 }
 
-func NewDecicionTreeeClassifier(opt options.Option) DecisionTreeClassifier {
-	return DecisionTreeClassifier {
+func NewDecicionTreeeClassifier(opt options.Option) *DecisionTreeClassifier {
+	return &DecisionTreeClassifier {
 		Opts: opt,
 	}
 }
