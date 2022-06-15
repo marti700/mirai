@@ -2,25 +2,25 @@ package treemodels
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/marti700/mirai/options"
 	"github.com/marti700/veritas/linearalgebra"
 	"github.com/marti700/veritas/stats"
 )
 
-
 type DecisionTreeClassifier struct {
 	Model *Tree
-	Opts options.Option
+	Opts  options.DTreeClassifierOption
 }
 
-func NewDecicionTreeeClassifier(opt options.Option) *DecisionTreeClassifier {
-	return &DecisionTreeClassifier {
+func NewDecicionTreeeClassifier(opt options.DTreeClassifierOption) *DecisionTreeClassifier {
+	return &DecisionTreeClassifier{
 		Opts: opt,
 	}
 }
 
-// recieves a column vector as input and returns a map wich keys are the values of the vector
+// recieves a column vector as input and returns a map which keys are the values of the vector
 // and its values the number of times the key appears in the vector
 func getValueCounts(target linearalgebra.Matrix) map[float64]int {
 	if !linearalgebra.IsColumnVector(target) {
@@ -42,7 +42,7 @@ func getValueCounts(target linearalgebra.Matrix) map[float64]int {
 	return values
 }
 
-// calculates the gini impurity of a feature
+// calculates the gini impurity of a feature (1 - sigma(p^2))
 // this function recieves the classification classes as a column vector
 func giniImpurity(classes linearalgebra.Matrix) float64 {
 	classValueCounts := getValueCounts(classes)
@@ -56,8 +56,23 @@ func giniImpurity(classes linearalgebra.Matrix) float64 {
 	return 1 - gini
 }
 
+// calculates the entropy of a feature (-sigma(p*log2(p)))
+// this function recieves the classification classes as a column vector
+func entropy(classes linearalgebra.Matrix) float64 {
+	classValueCounts := getValueCounts((classes))
+	entropy := 0.0
+
+	for _, value := range classValueCounts {
+		pValue := float64(value) / float64(classes.Row) // probability of getting this class
+		entropy += pValue * math.Log2(pValue)
+	}
+
+	return entropy * -1.0
+}
+
 // returns the index of the feature with less gini impurity (hence the best spliting feature) and the subfeature with the less impurity
-func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
+func selectBestSplit(data linearalgebra.Matrix, criterion string) (int, float64) {
+	// TODO: Use Information gain to improve tree splitting
 	selectedImp := 42.0
 	var bestFeatureIndex int
 	var bestMidPoint float64
@@ -72,7 +87,7 @@ func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 				return r.Get(0, 0) < midPoints[j]
 			}, 0)
 
-			fImpurities[j] = (float64(less.Row)/float64(currentFeature.Row))*wrapImp(less) + (float64(greater.Row)/float64(currentFeature.Row))*wrapImp(greater)
+			fImpurities[j] = (float64(less.Row)/float64(currentFeature.Row))*wrapImp(less, criterion) + (float64(greater.Row)/float64(currentFeature.Row))*wrapImp(greater, criterion)
 		}
 		currentFeatureImp := stats.Mean(fImpurities)
 
@@ -88,20 +103,24 @@ func selectBestSplit(data linearalgebra.Matrix) (int, float64) {
 
 // some times matrix with no data will be returned and matrix#GetCol will panic with index out of bound when trying to get columns of an emtpy matrix
 // this function is a wrapper arround the giniImpurity function so 0 if returned for an empty matrix
-func wrapImp(m linearalgebra.Matrix) float64 {
+func wrapImp(m linearalgebra.Matrix, criterion string) float64 {
 	if m.Row == 0 {
 		return 0.0
 	}
-	return giniImpurity(m.GetCol(1))
+	if criterion == "GINI" {
+		return giniImpurity(m.GetCol(1))
+	} else {
+		return entropy(m.GetCol(1))
+	}
 }
 
 func (t *DecisionTreeClassifier) Train(data, target linearalgebra.Matrix) {
 	featureTarget := linearalgebra.Insert(target, data, data.Col)
-	t.Model = buildClassificationTree(featureTarget)
+	t.Model = buildClassificationTree(featureTarget, t.Opts)
 }
 
 // recursively trains a classification tree and returns the trained tree
-func buildClassificationTree(data linearalgebra.Matrix) *Tree {
+func buildClassificationTree(data linearalgebra.Matrix, opts options.DTreeClassifierOption) *Tree {
 	if len(data.Data) == 0 {
 		return &Tree{
 			Left:      nil,
@@ -125,18 +144,18 @@ func buildClassificationTree(data linearalgebra.Matrix) *Tree {
 	}
 
 	// Find best feature split
-	bestFeature, bFeatBin := selectBestSplit(data)
+	bestFeature, bFeatBin := selectBestSplit(data, opts.Criterion)
 	fmt.Println(bestFeature)
 
 	// left is the true branch of the tree and right the false one
 	left, right := linearalgebra.Filter2(data, func(r linearalgebra.Matrix) bool {
 		return r.Get(0, bestFeature) <= bFeatBin
 
-	},0)
+	}, 0)
 	// recursively build the tree
 	return &Tree{
-		Left:      buildClassificationTree(left),
-		Right:     buildClassificationTree(right),
+		Left:      buildClassificationTree(left, opts),
+		Right:     buildClassificationTree(right, opts),
 		feature:   bestFeature,
 		Condition: bFeatBin,
 		Data:      data,

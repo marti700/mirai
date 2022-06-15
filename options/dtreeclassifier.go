@@ -4,14 +4,14 @@ package options
 
 // Decision tree rclassifer options
 // the criterion parameter controls the criteria used to split the tree.
-//   for now the only supported criterion is GINI
+// supported criterion is GINI and ENTROPY
 type DTreeClassifierOption struct {
 	Criterion string
 }
 
 func NewDTreeClassifierOption (criterion string) DTreeClassifierOption {
 	return DTreeClassifierOption{
-		Criterion: "GINI",
+		Criterion: criterion,
 	}
 }
 

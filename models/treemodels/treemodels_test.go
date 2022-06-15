@@ -28,8 +28,29 @@ func TestClassificationTreeAcc(t *testing.T) {
 	if !testutils.IsAcceptableAccuarcyDiff(myModelAcc, skLearnModelAcc, 0.20) {
 		t.Error("Error accuarcy is not acceptable. This Model accuarcy is: ", myModelAcc, "but sklearn model accuarcy is :", skLearnModelAcc)
 	}
-
 }
+
+// Test the classification accuarcy of the decision tree modeel
+func TestClassificationTreeAccEntropy(t *testing.T) {
+
+	trainData := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/cdecisiontree/data/x_train.csv")
+	target := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/cdecisiontree/data/y_train.csv")
+
+	actualLabels := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/cdecisiontree/data/y_test.csv")
+	testData := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/cdecisiontree/data/x_test.csv")
+	model := NewDecicionTreeeClassifier(options.NewDTreeClassifierOption("ENTROPY"))
+	model.Train(trainData, target)
+	predicted := model.Predict(testData)
+	expectedPredictions := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/cdecisiontree/data/predictions.csv")
+
+	myModelAcc := metrics.Acc(predicted, actualLabels )
+	skLearnModelAcc := metrics.Acc(expectedPredictions, actualLabels)
+
+	if !testutils.IsAcceptableAccuarcyDiff(myModelAcc, skLearnModelAcc, 0.20) {
+		t.Error("Error accuarcy is not acceptable. This Model accuarcy is: ", myModelAcc, "but sklearn model accuarcy is :", skLearnModelAcc)
+	}
+}
+
 func TestRegressionTree(t *testing.T) {
 
 	trainData := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/rdecisiontree/data/x_train.csv")
