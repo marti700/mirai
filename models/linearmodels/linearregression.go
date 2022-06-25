@@ -47,8 +47,7 @@ type LinearRegression struct {
 // the data parameter is the data observations represented as a matrix
 // this function will set the hyperparameters directly in the reciver and will panic if
 // LROptions.Estimator = "gd" and LROptinos.LearningRate = 0
-func (m *LinearRegression) Train(target linearalgebra.Matrix,
-	data linearalgebra.Matrix) {
+func (m *LinearRegression) Train(data, target linearalgebra.Matrix) {
 
 	if m.Opts.Estimator.GetType() == "gd" {
 		learningRate := m.Opts.Estimator.(options.GDOptions).LearningRate

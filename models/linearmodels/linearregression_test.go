@@ -17,7 +17,7 @@ func TestLinearRegressionTrainGD(t *testing.T) {
 	}
 
 	lr := &linearmodels.LinearRegression{Opts: options}
-	lr.Train(target, trainData)
+	lr.Train(trainData, target)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/hyperparameters.csv")
@@ -45,7 +45,7 @@ func TestLinearRegressionTrainOLS(t *testing.T) {
 	}
 
 	lr := &linearmodels.LinearRegression{Opts: options}
-	lr.Train(target, trainData)
+	lr.Train(trainData, target)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/linearregression/data/hyperparameters.csv")
@@ -75,7 +75,7 @@ func TestRidgeRegressionTrainGD(t *testing.T) {
 	}
 
 	lm := &linearmodels.LinearRegression{Opts: options}
-	lm.Train(target, trainData)
+	lm.Train(trainData, target)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/ridgeregression/data/hyperparameters.csv")
@@ -105,7 +105,7 @@ func TestLassoRegressionTrainGD(t *testing.T) {
 	}
 
 	lm := &linearmodels.LinearRegression{Opts: options}
-	lm.Train(target, trainData)
+	lm.Train(trainData, target)
 
 	// expected hyper parameter estimations
 	expected := testutils.ReadDataFromcsv("../../testdata/datagenerators/data/lassoregression/data/hyperparameters.csv")

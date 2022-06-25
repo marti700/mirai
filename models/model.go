@@ -6,6 +6,6 @@ import (
 
 // interface that wraps the basic behavior of models
 type Model interface {
-	Train(target linearalgebra.Matrix, data linearalgebra.Matrix)
+	Train(data, target linearalgebra.Matrix)
 	Predict(data linearalgebra.Matrix) linearalgebra.Matrix
 }
