@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/marti700/veritas/linearalgebra"
 )
@@ -11,15 +12,16 @@ func Bootstrap(data linearalgebra.Matrix) (linearalgebra.Matrix, linearalgebra.M
 	inCache := make(map[int]int) // to keep records of the selected rows
 
 	var in linearalgebra.Matrix
+	rand.Seed(time.Now().UnixNano())
 
 	// randomly selects the rows for the new dataset
 	for i := 0; i < dataSize; i++ {
 		row := rand.Intn(dataSize - 1)
 		inCache[row] = row
 		if linearalgebra.IsEmpty(in) {
-			in = data.GetRow(i)
+			in = data.GetRow(row)
 		} else {
-			in = linearalgebra.Insert(data.GetRow(i), in, in.Row)
+			in = linearalgebra.Insert(data.GetRow(row), in, in.Row)
 		}
 	}
 
