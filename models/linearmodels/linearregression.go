@@ -2,6 +2,7 @@ package linearmodels
 
 import (
 	"github.com/marti700/mirai/estimators"
+	model "github.com/marti700/mirai/models"
 	"github.com/marti700/mirai/options"
 	"github.com/marti700/veritas/linearalgebra"
 )
@@ -78,7 +79,13 @@ func (m *LinearRegression) Train(data, target linearalgebra.Matrix) {
 }
 
 //gives predictions based on the hyperparameters estimations obtained by Train()
-func (m LinearRegression) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
+func (m *LinearRegression) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	data = linearalgebra.Insert(linearalgebra.Ones(data.Row, 1), data, 0) //to take into considaration the bias term
 	return data.Mult(m.Hyperparameters)
+}
+
+// Returns a new instance of this LinearRegression model
+func (m *LinearRegression) Clone() model.Model {
+	new_model := *m
+	return &new_model
 }

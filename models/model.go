@@ -8,4 +8,5 @@ import (
 type Model interface {
 	Train(data, target linearalgebra.Matrix)
 	Predict(data linearalgebra.Matrix) linearalgebra.Matrix
+	Clone() Model
 }

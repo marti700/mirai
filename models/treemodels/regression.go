@@ -3,6 +3,7 @@ package treemodels
 import (
 	"math"
 
+	model "github.com/marti700/mirai/models"
 	"github.com/marti700/mirai/options"
 	"github.com/marti700/veritas/linearalgebra"
 	"github.com/marti700/veritas/stats"
@@ -114,4 +115,11 @@ func buildRegressionTree(data linearalgebra.Matrix, opts options.DTreeRegreessor
 // Returns a Matrix containing the predictions for the provided data
 func (t *DecisionTreeRegressor) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	return genPredictions(data, t.Model)
+}
+
+
+// Returns a new instance of this DecisionTreeRegressor model
+func (t *DecisionTreeRegressor) Clone() model.Model {
+	new_m := *t
+	return &new_m
 }

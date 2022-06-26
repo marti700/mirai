@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	model "github.com/marti700/mirai/models"
 	"github.com/marti700/mirai/options"
 	"github.com/marti700/veritas/linearalgebra"
 	"github.com/marti700/veritas/stats"
@@ -167,4 +168,10 @@ func buildClassificationTree(data linearalgebra.Matrix, opts options.DTreeClassi
 // Returns a Matrix containing predictions for the provided data
 func (t *DecisionTreeClassifier) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	return genPredictions(data, t.Model)
+}
+
+// Returns a new instance of this DecisionTreeClassifier model
+func (t *DecisionTreeClassifier) Clone() model.Model {
+	new_m := *t
+	return &new_m
 }
