@@ -117,9 +117,7 @@ func (t *DecisionTreeRegressor) Predict(data linearalgebra.Matrix) linearalgebra
 	return genPredictions(data, t.Model)
 }
 
-
-// Returns a new instance of this DecisionTreeRegressor model
 func (t *DecisionTreeRegressor) Clone() model.Model {
-	new_m := *t
-	return &new_m
+	new_model := *t
+	return &new_model
 }

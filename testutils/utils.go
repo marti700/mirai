@@ -26,7 +26,7 @@ func IsAcceptableAccuarcyDiff(miraiModelAcc, skLearnModelAcc, diff float64) bool
 	if miraiModelAcc <= skLearnModelAcc {
 		return true
 	}
-	accDiff := skLearnModelAcc - miraiModelAcc
+	accDiff := math.Abs(skLearnModelAcc - miraiModelAcc)
 	return accDiff <= diff
 }
 

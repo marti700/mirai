@@ -8,14 +8,14 @@ import (
 	"github.com/marti700/veritas/linearalgebra"
 )
 
-type BaggingClassifier struct {
+type BaggingRegressor struct {
 	Model         model.Model
 	N_models      int
 	trainedModels []model.Model
 }
 
-// trains this Bagging classifier
-func (b *BaggingClassifier) Train(data, target linearalgebra.Matrix) {
+// trains this Bagging Regressor
+func (b *BaggingRegressor) Train(data, target linearalgebra.Matrix) {
 	b.trainedModels = make([]model.Model, b.N_models)
 	// resp := make(chan model.Model, b.N_models)
 
@@ -40,14 +40,19 @@ func (b *BaggingClassifier) Train(data, target linearalgebra.Matrix) {
 }
 
 // Predicts by averaging each model prediction
-func (b *BaggingClassifier) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
+func (b *BaggingRegressor) Predict(data linearalgebra.Matrix) linearalgebra.Matrix {
 	p_sum := b.trainedModels[0].Predict(data)
 
 	for i := 1; i < len(b.trainedModels); i++ {
-		p_sum.Sum(b.trainedModels[i].Predict(data))
+		p_sum = p_sum.Sum(b.trainedModels[i].Predict(data))
 	}
 
 	return p_sum.Map(func(x float64) float64 {
 		return x/float64(b.N_models)
 	})
+}
+
+//NOT IMPLEMENTED YET
+func (b *BaggingRegressor) Clone() model.Model{
+	return nil
 }

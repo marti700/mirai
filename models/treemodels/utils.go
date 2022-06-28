@@ -14,6 +14,8 @@ func getMidPoints(data linearalgebra.Matrix) []float64 {
 		panic("input matrix must be a column vector")
 	}
 
+	tracker := make(map[float64]float64)
+
 	sort.Float64s(data.Data)
 	r := append(data.Data, data.Data[len(data.Data)-1]+1) //adds extra element to obtain a midpoint above the last number
 	midPoints := make([]float64, 0, len(r))
@@ -22,14 +24,22 @@ func getMidPoints(data linearalgebra.Matrix) []float64 {
 	j := 1
 
 	for j < len(r) {
-		midPoints = append(midPoints, (r[i]+r[j])/2.0)
+		// just procces the data when the contiguous numbers are different
+		if r[i] != r[j] {
+			candidate := (r[i] + r[j]) / 2.0
+			_, present := tracker[candidate]
+			// don't insert duplicate point in the final result
+			if !present {
+				tracker[candidate] = candidate
+				midPoints = append(midPoints, candidate)
+			}
+		}
 		i++
 		j++
 	}
 
 	return midPoints
 }
-
 
 // returns the index of the lowest value of this slice
 func min(s []float64) int {
@@ -44,7 +54,6 @@ func min(s []float64) int {
 	return idx
 }
 
-
 // make predictions based on data
 // the data argument is a Matrix similar to the one used for training
 // Returns a Matrix containing predictions for the provided data
@@ -55,7 +64,6 @@ func genPredictions(data linearalgebra.Matrix, t *Tree) linearalgebra.Matrix {
 	}
 	return linearalgebra.NewColumnVector(predictions)
 }
-
 
 // outputs a prediction from a trained tree
 func makePrediction(data linearalgebra.Matrix, t *Tree) float64 {
