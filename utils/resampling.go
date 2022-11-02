@@ -4,9 +4,21 @@ import (
 	"math/rand"
 	"time"
 
-	model "github.com/marti700/mirai/models"
 	"github.com/marti700/veritas/linearalgebra"
 )
+
+// represents a Resampling Fold that contains test and training data
+// The fields:
+// Train: is the data used for training the model
+// Test: is the data used for testing the model
+// TargetTrain is the target variable (for wich we want to predict) of the raining set (The Train property)
+// TargetTest is the target variable (for wich we want to predict) of the testing set (The Test property)
+type Fold struct {
+	Train       linearalgebra.Matrix
+	Test        linearalgebra.Matrix
+	TargetTrain linearalgebra.Matrix
+	TargetTest  linearalgebra.Matrix
+}
 
 func Bootstrap(data linearalgebra.Matrix) (linearalgebra.Matrix, linearalgebra.Matrix) {
 	dataSize := data.Row
@@ -41,54 +53,61 @@ func Bootstrap(data linearalgebra.Matrix) (linearalgebra.Matrix, linearalgebra.M
 	return in, out
 }
 
-func cross_validate(data, target linearalgebra.Matrix,
-	k int,
-	t float32,
-	model model.Model,
-	metric func(linearalgebra.Matrix, linearalgebra.Matrix) float64) {
+func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 
-	cross_val_scores := make([]float64, k)
+	// cross_val_scores := make([]float64, k)
+	cross_val := make([]Fold, folds)
 
-	folds_diff := int(float32(data.Row) * t)
+	folds_diff := data.Row / folds
 	currentTestFoldStart := 0
 	currentTestFoldEnd := folds_diff
 
-	var test_fold linearalgebra.Matrix
-	var train_fold linearalgebra.Matrix
-
-	var target_test_fold linearalgebra.Matrix
-	var target_train_fold linearalgebra.Matrix
-
 	// for each fold
-	for i := 0; i < k; i++ {
+	for i := 0; i < folds; i++ {
+		var test_fold linearalgebra.Matrix
+		var train_fold linearalgebra.Matrix
+
+		var target_test_fold linearalgebra.Matrix
+		var target_train_fold linearalgebra.Matrix
 		// traverse the data matrix
 		for k := 0; k < data.Row; k++ {
 			// when in range get the test fold
-			if k >= currentTestFoldStart && k <= currentTestFoldEnd {
+			if k >= currentTestFoldStart && k < currentTestFoldEnd {
 				if linearalgebra.IsEmpty(test_fold) {
 					test_fold = data.GetRow(k)
 					target_test_fold = target.GetRow(k)
 				} else {
-					linearalgebra.Insert(data.GetRow(k), test_fold, test_fold.Row)
-					linearalgebra.Insert(target.GetRow(k), target_test_fold, target_test_fold.Row)
+					test_fold = linearalgebra.Insert(data.GetRow(k), test_fold, test_fold.Row)
+					target_test_fold = linearalgebra.Insert(target.GetRow(k), target_test_fold, target_test_fold.Row)
 				}
 			} else { //get the training fold
 				if linearalgebra.IsEmpty(train_fold) {
 					train_fold = data.GetRow(k)
 					target_train_fold = target.GetRow(k)
 				} else {
-					linearalgebra.Insert(data.GetRow(k), train_fold, train_fold.Row)
-					linearalgebra.Insert(target.GetRow(k), target_train_fold, target_test_fold.Row)
+					train_fold = linearalgebra.Insert(data.GetRow(k), train_fold, train_fold.Row)
+					target_train_fold = linearalgebra.Insert(target.GetRow(k), target_train_fold, target_test_fold.Row)
 				}
 
 			}
 
 			// get model score for the current fold
-			model.Train(data, target)
-			cross_val_scores = append(cross_val_scores, metric(target_test_fold, model.Predict(target_train_fold)))
+			// model.Train(data, target)
+			// cross_val_scores = append(cross_val_scores, metric(target_test_fold, model.Predict(target_train_fold)))
 
-			currentTestFoldEnd = folds_diff + currentTestFoldEnd
-			currentTestFoldStart = currentTestFoldEnd + 1
 		}
+
+		fold := Fold{
+			Test:        test_fold,
+			Train:       train_fold,
+			TargetTrain: target_train_fold,
+			TargetTest:  target_test_fold,
+		}
+		cross_val[i] = fold
+
+		currentTestFoldStart = currentTestFoldEnd
+		currentTestFoldEnd = folds_diff + currentTestFoldStart
+
 	}
+	return cross_val
 }
