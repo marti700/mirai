@@ -55,7 +55,6 @@ func Bootstrap(data linearalgebra.Matrix) (linearalgebra.Matrix, linearalgebra.M
 
 func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 
-	// cross_val_scores := make([]float64, k)
 	cross_val := make([]Fold, folds)
 
 	folds_diff := data.Row / folds
@@ -90,11 +89,6 @@ func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 				}
 
 			}
-
-			// get model score for the current fold
-			// model.Train(data, target)
-			// cross_val_scores = append(cross_val_scores, metric(target_test_fold, model.Predict(target_train_fold)))
-
 		}
 
 		fold := Fold{
