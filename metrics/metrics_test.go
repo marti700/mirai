@@ -3,6 +3,10 @@ package metrics
 import (
 	"testing"
 
+	"github.com/marti700/mirai/models/linearmodels"
+	"github.com/marti700/mirai/options"
+	"github.com/marti700/mirai/testutils"
+	"github.com/marti700/mirai/utils"
 	"github.com/marti700/veritas/linearalgebra"
 )
 
@@ -48,5 +52,30 @@ func TestRSS(t *testing.T) {
 
 	if result != expected {
 		t.Error("Expected result is: ", expected, "but actual was :", result)
+	}
+}
+
+func TestCrossValidate(t *testing.T) {
+
+	// get data
+	data := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/x_train.csv")
+	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/y_train.csv")
+
+	// get cross validation folds
+	kFolds := 10
+	crossValidation := utils.CrossValidate(data, target, kFolds)
+
+	// train a linear regression model
+	options := options.LROptions{
+		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
+	}
+	lr := &linearmodels.LinearRegression{Opts: options}
+	lr.Train(data, target)
+
+	//get the cross validation score
+	crossValScores := CrossValidationScore(crossValidation, lr, MeanSquareError)
+
+	if len(crossValScores) != 10 {
+		t.Error("The number of folds are expected to be 10")
 	}
 }
