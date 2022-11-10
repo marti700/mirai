@@ -58,12 +58,10 @@ func TestRSS(t *testing.T) {
 func TestCrossValidate(t *testing.T) {
 
 	// get data
-	// data := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/x_train.csv")
-	// target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/linearregression/data/y_train.csv")
-
 	data := testutils.ReadDataFromcsv("../testdata/datagenerators/data/crossvalidation/data/X_train.csv")
 	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/crossvalidation/data/y_train.csv")
 	expectedResult := testutils.ReadDataFromcsv("../testdata/datagenerators/data/crossvalidation/data/cross_val_scores.csv")
+
 	// sklearn cross val score using the mean squared error are negated here we convert the scores to positive values
 	expectedResult = expectedResult.Map(func(x float64) float64 {
 		return -1.0 * x
