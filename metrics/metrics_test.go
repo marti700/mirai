@@ -70,7 +70,6 @@ func TestCrossValidate(t *testing.T) {
 		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
 	}
 	lr := &linearmodels.LinearRegression{Opts: options}
-	lr.Train(data, target)
 
 	//get the cross validation score
 	crossValScores := CrossValidationScore(crossValidation, lr, MeanSquareError)

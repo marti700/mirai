@@ -85,7 +85,7 @@ func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 					target_train_fold = target.GetRow(k)
 				} else {
 					train_fold = linearalgebra.Insert(data.GetRow(k), train_fold, train_fold.Row)
-					target_train_fold = linearalgebra.Insert(target.GetRow(k), target_train_fold, target_test_fold.Row)
+					target_train_fold = linearalgebra.Insert(target.GetRow(k), target_train_fold, target_train_fold.Row)
 				}
 
 			}
