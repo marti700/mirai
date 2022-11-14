@@ -58,50 +58,62 @@ func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 	cross_val := make([]Fold, folds)
 
 	folds_diff := data.Row / folds
+
+	foldChan := make(chan Fold)
+	defer close(foldChan)
+
 	currentTestFoldStart := 0
 	currentTestFoldEnd := folds_diff
 
-	// for each fold
 	for i := 0; i < folds; i++ {
-		var test_fold linearalgebra.Matrix
-		var train_fold linearalgebra.Matrix
-
-		var target_test_fold linearalgebra.Matrix
-		var target_train_fold linearalgebra.Matrix
-		// traverse the data matrix
-		for k := 0; k < data.Row; k++ {
-			// when in range get the test fold
-			if k >= currentTestFoldStart && k < currentTestFoldEnd {
-				if linearalgebra.IsEmpty(test_fold) {
-					test_fold = data.GetRow(k)
-					target_test_fold = target.GetRow(k)
-				} else {
-					test_fold = linearalgebra.Insert(data.GetRow(k), test_fold, test_fold.Row)
-					target_test_fold = linearalgebra.Insert(target.GetRow(k), target_test_fold, target_test_fold.Row)
-				}
-			} else { //get the training fold
-				if linearalgebra.IsEmpty(train_fold) {
-					train_fold = data.GetRow(k)
-					target_train_fold = target.GetRow(k)
-				} else {
-					train_fold = linearalgebra.Insert(data.GetRow(k), train_fold, train_fold.Row)
-					target_train_fold = linearalgebra.Insert(target.GetRow(k), target_train_fold, target_train_fold.Row)
-				}
-
-			}
-		}
-
-		fold := Fold{
-			Test:        test_fold,
-			Train:       train_fold,
-			TargetTrain: target_train_fold,
-			TargetTest:  target_test_fold,
-		}
-		cross_val[i] = fold
-
+		go getFold(currentTestFoldStart, currentTestFoldEnd, data, target, foldChan)
 		currentTestFoldStart = currentTestFoldEnd
 		currentTestFoldEnd = folds_diff + currentTestFoldStart
-
 	}
+
+	for i := 0; i < folds; i++ {
+		r := <-foldChan
+		cross_val[i] = r
+		// i++
+	}
+
 	return cross_val
+}
+
+func getFold(tStart, tEnd int, data, target linearalgebra.Matrix, foldChan chan Fold) {
+
+	var test_fold linearalgebra.Matrix
+	var train_fold linearalgebra.Matrix
+
+	var target_test_fold linearalgebra.Matrix
+	var target_train_fold linearalgebra.Matrix
+	// traverse the data matrix
+	for k := 0; k < data.Row; k++ {
+		// when in range get the test fold
+		if k >= tStart && k < tEnd {
+			if linearalgebra.IsEmpty(test_fold) {
+				test_fold = data.GetRow(k)
+				target_test_fold = target.GetRow(k)
+			} else {
+				test_fold = linearalgebra.Insert(data.GetRow(k), test_fold, test_fold.Row)
+				target_test_fold = linearalgebra.Insert(target.GetRow(k), target_test_fold, target_test_fold.Row)
+			}
+		} else { //get the training fold
+			if linearalgebra.IsEmpty(train_fold) {
+				train_fold = data.GetRow(k)
+				target_train_fold = target.GetRow(k)
+			} else {
+				train_fold = linearalgebra.Insert(data.GetRow(k), train_fold, train_fold.Row)
+				target_train_fold = linearalgebra.Insert(target.GetRow(k), target_train_fold, target_train_fold.Row)
+			}
+
+		}
+	}
+
+	foldChan <- Fold{
+		Test:        test_fold,
+		Train:       train_fold,
+		TargetTrain: target_train_fold,
+		TargetTest:  target_test_fold,
+	}
 }

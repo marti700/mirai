@@ -25,7 +25,7 @@ func TestCrossValidate(t *testing.T) {
 
 	kFolds := 10
 
-	crossValidation := CrossValidate(data, target, kFolds)
+	crossValidation := CrossValidate1(data, target, kFolds)
 
 	if len(crossValidation) != 10 {
 		t.Error("The number of folds are expected to be 10")
