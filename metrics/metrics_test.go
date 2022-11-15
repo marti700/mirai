@@ -87,3 +87,35 @@ func TestCrossValidate(t *testing.T) {
 		t.Error("Error expected result is ", expectedResult, " but was", crossValScores)
 	}
 }
+func TestCrossValidateConcurrent(t *testing.T) {
+
+	// get data
+	data := testutils.ReadDataFromcsv("../testdata/datagenerators/data/crossvalidation/data/X_train.csv")
+	target := testutils.ReadDataFromcsv("../testdata/datagenerators/data/crossvalidation/data/y_train.csv")
+	expectedResult := testutils.ReadDataFromcsv("../testdata/datagenerators/data/crossvalidation/data/cross_val_scores.csv")
+
+	// sklearn cross val score using the mean squared error are negated here we convert the scores to positive values
+	expectedResult = expectedResult.Map(func(x float64) float64 {
+		return -1.0 * x
+	})
+	// get cross validation folds
+	kFolds := 10
+	crossValidation := utils.CrossValidate(data, target, kFolds)
+
+	// train a linear regression model
+	options := options.LROptions{
+		Estimator: options.NewGDOptions(1000, 0.001, 0.00003),
+	}
+	lr := &linearmodels.LinearRegression{Opts: options}
+
+	//get the cross validation score
+	crossValScores := CrossValidationScoreConcurrent(crossValidation, lr, MeanSquareError)
+
+	if len(crossValScores) != 10 {
+		t.Error("The number of folds are expected to be 10")
+	}
+
+	if !testutils.AcceptableResults(expectedResult, linearalgebra.NewColumnVector(crossValScores), 50) {
+		t.Error("Error expected result is ", expectedResult, " but was", crossValScores)
+	}
+}

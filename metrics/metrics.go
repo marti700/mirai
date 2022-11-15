@@ -38,6 +38,8 @@ func RSS(actual, predicted linearalgebra.Matrix) float64 {
 
 // calculate the cross validation score of a given model with the given metric function
 // and given a cross validation fold (that can be obtained with utils.CrossValidation)
+// this funciton uses a single thread to produce the scores in the order specified in the Folds parameter
+// useful when is necesariy to know what scores belongs to what fold
 func CrossValidationScore(folds []utils.Fold,
 	model model.Model,
 	metric func(linearalgebra.Matrix, linearalgebra.Matrix) float64) []float64 {
@@ -47,5 +49,37 @@ func CrossValidationScore(folds []utils.Fold,
 		model.Train(f.Train, f.TargetTrain)
 		results[i] = metric(f.TargetTest, model.Predict(f.Test))
 	}
+	return results
+}
+
+// calculate the cross validation score of a given model with the given metric function concurrently
+// and given a cross validation fold (that can be obtained with utils.CrossValidation)
+// this funciton uses multiple threads to produce the scores but the orders on which the scores ends in the
+// returned slice is not warrantied.
+func CrossValidationScoreConcurrent(folds []utils.Fold,
+	mod model.Model,
+	metric func(linearalgebra.Matrix, linearalgebra.Matrix) float64) []float64 {
+
+	scoreCh := make(chan float64, len(folds))
+	defer close(scoreCh)
+
+	score := func(f utils.Fold,
+		m model.Model,
+		metric func(linearalgebra.Matrix, linearalgebra.Matrix) float64, ch chan float64) {
+
+		mod.Train(f.Train, f.TargetTrain)
+		ch <- metric(f.TargetTest, mod.Predict(f.Test))
+	}
+
+	for _, f := range folds {
+		go score(f, mod, metric, scoreCh)
+	}
+
+	results := make([]float64, len(folds))
+	for i := 0; i < len(folds); i++ {
+		r := <-scoreCh
+		results[i] = r
+	}
+
 	return results
 }
