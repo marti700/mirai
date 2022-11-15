@@ -53,6 +53,7 @@ func Bootstrap(data linearalgebra.Matrix) (linearalgebra.Matrix, linearalgebra.M
 	return in, out
 }
 
+// Perform k-fold cross validation and returns an array of Folds of the size of the fold parameter
 func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 
 	cross_val := make([]Fold, folds)
@@ -74,12 +75,14 @@ func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 	for i := 0; i < folds; i++ {
 		r := <-foldChan
 		cross_val[i] = r
-		// i++
 	}
 
 	return cross_val
 }
 
+// Writes a Fold to a channel. Given the range of the test data (tStart, tEnd) creates a Fold
+// The test data will be the rows that are between the range (tStart, tEnd) and the other rows
+// will be taken as train data
 func getFold(tStart, tEnd int, data, target linearalgebra.Matrix, foldChan chan Fold) {
 
 	var test_fold linearalgebra.Matrix
