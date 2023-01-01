@@ -4,6 +4,7 @@ import (
 	model "github.com/marti700/mirai/models"
 	"github.com/marti700/mirai/utils"
 	"github.com/marti700/veritas/linearalgebra"
+	"github.com/marti700/veritas/stats"
 )
 
 // calculates the mean square error of two column vectors
@@ -30,15 +31,15 @@ func Acc(predicted, actual linearalgebra.Matrix) float64 {
 	return (float64(tElements - diff)) / float64(tElements)
 }
 
-// Cualculates the residual squared error of a vector
+// Cualculates the residual sum of squares
 func RSS(actual, predicted linearalgebra.Matrix) float64 {
 	squareF := func(x float64) float64 { return x * x }
 	return linearalgebra.ElementsSum(actual.Substract(predicted).Map(squareF))
 }
 
 // calculate the cross validation score of a given model with the given metric function
-// and given a cross validation fold (that can be obtained with utils.CrossValidation)
-// this funciton uses a single thread to produce the scores in the order specified in the Folds parameter
+// given a cross validation fold (that can be obtained with utils.CrossValidation)
+// this funciton uses a single thread to produce the scores in the order specified in the folds parameter
 // useful when is necesariy to know what scores belongs to what fold
 func CrossValidationScore(folds []utils.Fold,
 	model model.Model,
@@ -53,7 +54,7 @@ func CrossValidationScore(folds []utils.Fold,
 }
 
 // calculate the cross validation score of a given model with the given metric function concurrently
-// and given a cross validation fold (that can be obtained with utils.CrossValidation)
+// given a cross validation fold (that can be obtained with utils.CrossValidation)
 // this funciton uses multiple threads to produce the scores but the orders on which the scores ends in the
 // returned slice is not warrantied.
 func CrossValidationScoreConcurrent(folds []utils.Fold,
@@ -82,4 +83,19 @@ func CrossValidationScoreConcurrent(folds []utils.Fold,
 	}
 
 	return results
+}
+
+// Computes R squared
+func RSquared(actual, predicted linearalgebra.Matrix) float64 {
+	// functions to square a number
+	squareF := func(x float64) float64 { return x * x }
+	// gets the mean of the actual values of y
+	actualMean := stats.Mean(actual.Data)
+	//Makes a vector which all its entries are the value for the actualMean)
+	actualMeanVector := linearalgebra.Ones(actual.Row, actual.Col).ScaleBy(actualMean)
+	// calculate the total sum of squares
+	SST := linearalgebra.ElementsSum(actual.Substract(actualMeanVector).Map(squareF))
+	RSS := RSS(actual, predicted)
+
+	return 1 - (RSS / SST)
 }

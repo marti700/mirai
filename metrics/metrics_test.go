@@ -119,3 +119,15 @@ func TestCrossValidateConcurrent(t *testing.T) {
 		t.Error("Error expected result is ", expectedResult, " but was", crossValScores)
 	}
 }
+
+func TestRSquared(t *testing.T) {
+	actual := linearalgebra.NewColumnVector([]float64{3, 8, 10, 17, 24, 27})
+	predicted := linearalgebra.NewColumnVector([]float64{2, 8, 10, 13, 18, 20})
+
+	result := RSquared(actual, predicted)
+
+	if result != 0.7717269675494218 {
+		t.Error("Error expected result is 0.9729", " but was", result)
+
+	}
+}
