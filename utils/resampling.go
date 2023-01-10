@@ -80,9 +80,9 @@ func CrossValidate(data, target linearalgebra.Matrix, folds int) []Fold {
 	return cross_val
 }
 
-// Writes a Fold to a channel. Given the range of the test data (tStart, tEnd) creates a Fold
-// The test data will be the rows that are between the range (tStart, tEnd) and the other rows
-// will be taken as train data
+// Writes a Fold to a channel. Given the range of the test data (tStart, tEnd) creates a Fold.
+// The test component of the fold (fold.test, fold.targetTest) will be the rows that are between the range (tStart, tEnd)
+// the other rows will be taken as train data
 func getFold(tStart, tEnd int, data, target linearalgebra.Matrix, foldChan chan Fold) {
 
 	var test_fold linearalgebra.Matrix

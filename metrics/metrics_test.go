@@ -127,7 +127,26 @@ func TestRSquared(t *testing.T) {
 	result := RSquared(actual, predicted)
 
 	if result != 0.7717269675494218 {
-		t.Error("Error expected result is 0.9729", " but was", result)
+		t.Error("Error expected result is 0.7717269675494218", " but was", result)
 
+	}
+}
+
+func TestGetConfusionMatrix(t *testing.T) {
+	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+
+	result := GetConfusionMatrix(actual, predicted)
+
+	expectedResult := make([]ConfusionMatrix, 3)
+
+	expectedResult[0] = ConfusionMatrix{TP: 16, FP: 0, FN: 0, TN: 29}
+	expectedResult[1] = ConfusionMatrix{TP: 17, FP: 0, FN: 1, TN: 27}
+	expectedResult[2] = ConfusionMatrix{TP: 11, FP: 1, FN: 0, TN: 33}
+
+	for i, r := range result {
+		if r != expectedResult[i] {
+			t.Error("Error expected result is ", expectedResult[i], " but was", r)
+		}
 	}
 }

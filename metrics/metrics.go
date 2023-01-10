@@ -7,6 +7,13 @@ import (
 	"github.com/marti700/veritas/stats"
 )
 
+type ConfusionMatrix struct {
+	TP int
+	FP int
+	FN int
+	TN int
+}
+
 // calculates the mean square error of two column vectors
 func MeanSquareError(actual, predicted linearalgebra.Matrix) float64 {
 	dataPoints := actual.Row
@@ -98,4 +105,88 @@ func RSquared(actual, predicted linearalgebra.Matrix) float64 {
 	RSS := RSS(actual, predicted)
 
 	return 1 - (RSS / SST)
+}
+
+func GetConfusionMatrix(actual, predicted linearalgebra.Matrix) []ConfusionMatrix {
+
+	getTPFor := func(class float64, actual, predicted linearalgebra.Matrix) float64 {
+		TP := 0.0
+		for i, a := range actual.Data {
+			if predicted.Data[i] == class && a == class {
+				TP += 1
+			}
+		}
+		return TP
+	}
+
+	getFPFor := func(class float64, actual, predicted linearalgebra.Matrix) float64 {
+		FP := 0.0
+
+		for i, a := range actual.Data {
+			if predicted.Data[i] == class && a != class {
+				FP += 1
+			}
+		}
+
+		return FP
+	}
+
+	getFNFor := func(class float64, actual, predicted linearalgebra.Matrix) float64 {
+		FN := 0.0
+
+		for i, a := range actual.Data {
+			if predicted.Data[i] != class && a == class {
+				FN += 1
+			}
+		}
+
+		return FN
+	}
+
+	getTNFor := func(class float64, actual, predicted linearalgebra.Matrix) float64 {
+		TN := 0.0
+
+		for i, a := range actual.Data {
+			if predicted.Data[i] != class && a != class {
+				TN += 1
+			}
+		}
+		return TN
+	}
+
+	uniqueClassValues := getUniqueValues(actual)
+	cms := make([]ConfusionMatrix, len(uniqueClassValues))
+	for i, cls := range uniqueClassValues {
+		cms[i] = ConfusionMatrix{
+			TP: int(getTPFor(cls, actual, predicted)),
+			FP: int(getFPFor(cls, actual, predicted)),
+			FN: int(getFNFor(cls, actual, predicted)),
+			TN: int(getTNFor(cls, actual, predicted)),
+		}
+	}
+
+	return cms
+}
+
+// recieves a column vector as input and returns a map which keys are the values of the vector
+// and its values the number of times the key appears in the vector
+func getUniqueValues(target linearalgebra.Matrix) []float64 {
+	if !linearalgebra.IsColumnVector(target) {
+		panic("target must be a column Vector")
+	}
+
+	values := make(map[float64]int)
+	uniqueValues := make([]float64, 0, target.Row)
+
+	for i := 0; i < target.Row; i++ {
+		currentVal := target.Get(i, 0)
+		_, present := values[currentVal]
+		if !present {
+			values[currentVal] = 1
+			uniqueValues = append(uniqueValues, currentVal)
+			// continue
+		}
+	}
+
+	return uniqueValues
 }
