@@ -150,3 +150,39 @@ func TestGetConfusionMatrix(t *testing.T) {
 		}
 	}
 }
+
+func TestGetAccuarcy(t *testing.T) {
+	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+
+	result := GetConfusionMatrix(actual, predicted)
+	expecterResult := 1.0
+
+	if result[0].GetAccuarcy() != 1.0 {
+		t.Error("Error expected result is", expecterResult, "but was", result[0].GetAccuarcy())
+	}
+}
+
+func TestGetPrecision(t *testing.T) {
+	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+
+	result := GetConfusionMatrix(actual, predicted)
+	expecterResult := 1.0
+
+	if result[1].GetPrecision() != 1.0 {
+		t.Error("Error expected result is", expecterResult, "but was", result[0].GetPrecision())
+	}
+}
+
+func TestGetRecall(t *testing.T) {
+	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+
+	result := GetConfusionMatrix(actual, predicted)
+	expecterResult := 1.0
+
+	if result[1].GetRecall() != 0.9444444444444444 {
+		t.Error("Error expected result is", expecterResult, "but was", result[0].GetRecall())
+	}
+}

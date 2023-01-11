@@ -7,11 +7,31 @@ import (
 	"github.com/marti700/veritas/stats"
 )
 
+// Represents a confusion matrix
+// TP are the true positive values
+// FP are the false positive values
+// FN are the false negative values
+// TN are the true negative values
 type ConfusionMatrix struct {
-	TP int
-	FP int
-	FN int
-	TN int
+	TP float64
+	FP float64
+	FN float64
+	TN float64
+}
+
+// calculates the accuarcy of the model from a ConfusionMatrix
+func (cm ConfusionMatrix) GetAccuarcy() float64 {
+	return (cm.TP + cm.TN) / (cm.TP + cm.FP + cm.FN + cm.TN)
+}
+
+// calculates the precision of the model from a ConfusionMatrix
+func (cm ConfusionMatrix) GetPrecision() float64 {
+	return cm.TP / (cm.TP + cm.FP)
+}
+
+// calculates the recall of the model from a ConfusionMatrix
+func (cm ConfusionMatrix) GetRecall() float64 {
+	return cm.TP / (cm.TP + cm.FN)
 }
 
 // calculates the mean square error of two column vectors
@@ -158,10 +178,10 @@ func GetConfusionMatrix(actual, predicted linearalgebra.Matrix) []ConfusionMatri
 	cms := make([]ConfusionMatrix, len(uniqueClassValues))
 	for i, cls := range uniqueClassValues {
 		cms[i] = ConfusionMatrix{
-			TP: int(getTPFor(cls, actual, predicted)),
-			FP: int(getFPFor(cls, actual, predicted)),
-			FN: int(getFNFor(cls, actual, predicted)),
-			TN: int(getTNFor(cls, actual, predicted)),
+			TP: getTPFor(cls, actual, predicted),
+			FP: getFPFor(cls, actual, predicted),
+			FN: getFNFor(cls, actual, predicted),
+			TN: getTNFor(cls, actual, predicted),
 		}
 	}
 
