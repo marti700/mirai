@@ -132,34 +132,55 @@ func TestRSquared(t *testing.T) {
 	}
 }
 
-func TestGetConfusionMatrix(t *testing.T) {
+func TestBuildConfusionMatrices(t *testing.T) {
 	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 
-	result := GetConfusionMatrix(actual, predicted)
+	result := BuildConfusionMatrices(actual, predicted)
 
-	expectedResult := make([]ConfusionMatrix, 3)
+	expectedResult := make(map[float64]ConfusionMatrix, 3)
 
-	expectedResult[0] = ConfusionMatrix{TP: 16, FP: 0, FN: 0, TN: 29}
-	expectedResult[1] = ConfusionMatrix{TP: 17, FP: 0, FN: 1, TN: 27}
-	expectedResult[2] = ConfusionMatrix{TP: 11, FP: 1, FN: 0, TN: 33}
+	expectedResult[1] = ConfusionMatrix{TP: 16, FP: 0, FN: 0, TN: 29}
+	expectedResult[2] = ConfusionMatrix{TP: 17, FP: 0, FN: 1, TN: 27}
+	expectedResult[3] = ConfusionMatrix{TP: 11, FP: 1, FN: 0, TN: 33}
 
 	for i, r := range result {
-		if r != expectedResult[i] {
-			t.Error("Error expected result is ", expectedResult[i], " but was", r)
+		if r != expectedResult[float64(i)] {
+			t.Error("Error expected result is ", expectedResult[float64(i)], " but was", r)
 		}
 	}
+}
+
+func TestBuildConfusionMatrix(t *testing.T) {
+	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+
+	result := BuildConfusionMatrixFor(1, actual, predicted)
+
+	// expectedResult := make(map[float64]ConfusionMatrix, 3)
+
+	expectedResult := ConfusionMatrix{TP: 16, FP: 0, FN: 0, TN: 29}
+	// expectedResult[2] = ConfusionMatrix{TP: 17, FP: 0, FN: 1, TN: 27}
+	// expectedResult[3] = ConfusionMatrix{TP: 11, FP: 1, FN: 0, TN: 33}
+
+	// for i, r := range result {
+	if result != expectedResult {
+		t.Error("Error expected result is ", expectedResult, " but was", result)
+	}
+	// }
 }
 
 func TestGetAccuarcy(t *testing.T) {
 	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 
-	result := GetConfusionMatrix(actual, predicted)
+	result := BuildConfusionMatrices(actual, predicted)
 	expecterResult := 1.0
 
-	if result[0].GetAccuarcy() != 1.0 {
-		t.Error("Error expected result is", expecterResult, "but was", result[0].GetAccuarcy())
+	resultAcc := result[1.0]
+
+	if resultAcc.GetAccuarcy() != 1.0 {
+		t.Error("Error expected result is", expecterResult, "but was", result[1].GetAccuarcy())
 	}
 }
 
@@ -167,11 +188,11 @@ func TestGetPrecision(t *testing.T) {
 	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 
-	result := GetConfusionMatrix(actual, predicted)
+	result := BuildConfusionMatrices(actual, predicted)
 	expecterResult := 1.0
 
 	if result[1].GetPrecision() != 1.0 {
-		t.Error("Error expected result is", expecterResult, "but was", result[0].GetPrecision())
+		t.Error("Error expected result is", expecterResult, "but was", result[1].GetPrecision())
 	}
 }
 
@@ -179,10 +200,10 @@ func TestGetRecall(t *testing.T) {
 	actual := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 	predicted := linearalgebra.NewColumnVector([]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 
-	result := GetConfusionMatrix(actual, predicted)
+	result := BuildConfusionMatrices(actual, predicted)
 	expecterResult := 1.0
 
-	if result[1].GetRecall() != 0.9444444444444444 {
-		t.Error("Error expected result is", expecterResult, "but was", result[0].GetRecall())
+	if result[1].GetRecall() != 1.0 {
+		t.Error("Error expected result is", expecterResult, "but was", result[1].GetRecall())
 	}
 }

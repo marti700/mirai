@@ -127,8 +127,20 @@ func RSquared(actual, predicted linearalgebra.Matrix) float64 {
 	return 1 - (RSS / SST)
 }
 
-func GetConfusionMatrix(actual, predicted linearalgebra.Matrix) []ConfusionMatrix {
+// Build a confusion matrices for each classification class
+func BuildConfusionMatrices(actual, predicted linearalgebra.Matrix) map[float64]ConfusionMatrix {
 
+	uniqueClassValues := getUniqueValues(actual)
+	// cms := make([]ConfusionMatrix, len(uniqueClassValues))
+	AllConfMatrices := make(map[float64]ConfusionMatrix)
+	for _, cls := range uniqueClassValues {
+		AllConfMatrices[cls] = BuildConfusionMatrixFor(cls, actual, predicted)
+	}
+
+	return AllConfMatrices
+}
+
+func BuildConfusionMatrixFor(class float64, actual, predicted linearalgebra.Matrix) ConfusionMatrix {
 	getTPFor := func(class float64, actual, predicted linearalgebra.Matrix) float64 {
 		TP := 0.0
 		for i, a := range actual.Data {
@@ -174,18 +186,12 @@ func GetConfusionMatrix(actual, predicted linearalgebra.Matrix) []ConfusionMatri
 		return TN
 	}
 
-	uniqueClassValues := getUniqueValues(actual)
-	cms := make([]ConfusionMatrix, len(uniqueClassValues))
-	for i, cls := range uniqueClassValues {
-		cms[i] = ConfusionMatrix{
-			TP: getTPFor(cls, actual, predicted),
-			FP: getFPFor(cls, actual, predicted),
-			FN: getFNFor(cls, actual, predicted),
-			TN: getTNFor(cls, actual, predicted),
-		}
+	return ConfusionMatrix{
+		TP: getTPFor(class, actual, predicted),
+		FP: getFPFor(class, actual, predicted),
+		FN: getFNFor(class, actual, predicted),
+		TN: getTNFor(class, actual, predicted),
 	}
-
-	return cms
 }
 
 // recieves a column vector as input and returns a map which keys are the values of the vector
